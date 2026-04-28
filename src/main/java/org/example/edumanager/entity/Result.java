@@ -14,12 +14,17 @@ public class Result {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "student_id")
     private Student student;
 
     @ManyToOne
+    @JoinColumn(name = "subject_id")
     private Subject subject;
 
     private String semester;
+
+
+    private String examType;
 
     private int marks;
 

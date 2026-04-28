@@ -26,7 +26,5 @@ public class Staff {
 
     private String department;
 
-    private String profileImageUrl;
-
     private String role = "ROLE_STAFF";
 }

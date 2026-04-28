@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Generate Exam Paper</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #eef2f7; }
+        .sidebar { width: 240px; height: 100vh; background: linear-gradient(180deg,#1e3c72,#2a5298); color: white; position: fixed; padding-top: 20px; display: flex; flex-direction: column; }
+        .sidebar h2 { text-align: center; margin-bottom: 30px; font-size: 1.1rem; padding: 0 10px; }
+        .sidebar a { display: flex; align-items: center; gap: 10px; padding: 13px 20px; color: white; text-decoration: none; font-size: 0.95rem; transition: background 0.2s; }
+        .sidebar a:hover { background: rgba(255,255,255,0.15); border-left: 3px solid #fff; }
+        .sidebar a.active { background: rgba(255,255,255,0.2); border-left: 3px solid #fff; }
+        .sidebar .logout-btn { margin-top: auto; background: rgba(255,0,0,0.2); }
+        .sidebar .logout-btn:hover { background: rgba(255,0,0,0.4); }
+        .main { margin-left: 240px; padding: 25px; }
+        .page-title { font-size: 1.6rem; font-weight: bold; color: #1e3c72; margin-bottom: 5px; }
+        .page-sub { color: #777; margin-bottom: 25px; }
+        .card { background: white; border-radius: 14px; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 22px; }
+        .card h3 { margin-top: 0; color: #1e3c72; border-bottom: 2px solid #eef2f7; padding-bottom: 10px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-weight: 600; color: #555; font-size: 0.9rem; }
+        .form-group input, .form-group select, .form-group textarea { padding: 10px 14px; border: 1.5px solid #dde1e7; border-radius: 8px; font-size: 0.95rem; outline: none; transition: border 0.2s; font-family: inherit; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #1e3c72; }
+        .full { grid-column: 1/-1; }
+        .btn-generate { background: linear-gradient(135deg,#1e3c72,#2a5298); color: white; padding: 13px 32px; border: none; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: opacity 0.2s; }
+        .btn-generate:hover { opacity: 0.9; }
+        .btn-generate:disabled { opacity: 0.6; cursor: not-allowed; }
+        .section-config { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 16px; }
+        .section-box { background: #f8f9fb; border: 1.5px solid #dde1e7; border-radius: 10px; padding: 14px; }
+        .section-box h4 { margin: 0 0 10px; color: #333; font-size: 0.9rem; }
+        .section-box input { width: 100%; padding: 7px 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; }
+        .hint { font-size: 0.8rem; color: #999; margin-top: 4px; }
+        /* Result area */
+        #paperResult { display: none; }
+        .paper-box { background: #fff; border: 1.5px solid #dde1e7; border-radius: 12px; padding: 24px; font-family: 'Segoe UI', serif; line-height: 1.7; white-space: pre-wrap; color: #333; position: relative; }
+        .paper-actions { display: flex; gap: 12px; margin-top: 14px; }
+        .btn-action { padding: 9px 20px; border: 1.5px solid #1e3c72; border-radius: 8px; background: white; color: #1e3c72; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; }
+        .btn-action:hover { background: #1e3c72; color: white; }
+        .loading { display: none; text-align: center; padding: 30px; }
+        .spinner { width: 44px; height: 44px; border: 4px solid #eee; border-top: 4px solid #1e3c72; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .tag { display: inline-block; background: #e8edf8; color: #1e3c72; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; margin-right: 5px; }
+        .marks-badge { background: linear-gradient(135deg,#1e3c72,#2a5298); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <h2>👨‍🏫 EduManager Staff</h2>
+    <a href="/staff/dashboard">🏠 Dashboard</a>
+    <a href="/staff/attendance">📋 Attendance</a>
+    <a href="/staff/notes">📚 Upload Notes</a>
+    <a href="/staff/result">📊 Results</a>
+    <a href="/staff/announcement">📢 Announcements</a>
+    <a href="/staff/leave">🗓️ Leave</a>
+    <a href="/staff/generate-exam" class="active">🧠 Generate Exam</a>
+    <a href="/staff/logout" class="logout-btn">🚪 Logout</a>
+</div>
+<div class="main">
+    <div class="page-title">🧠 AI Exam Paper Generator</div>
+    <div class="page-sub">Fill in the details below to auto-generate a complete exam paper using AI.</div>
+
+    <div class="card">
+        <h3>📝 Exam Configuration</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Subject / Course Name *</label>
+                <input type="text" id="subject" placeholder="e.g., Data Structures, Operating Systems">
+            </div>
+            <div class="form-group">
+                <label>Course Code</label>
+                <input type="text" id="courseCode" placeholder="e.g., CS301">
+            </div>
+            <div class="form-group">
+                <label>Total Number of Questions *</label>
+                <input type="number" id="totalQuestions" placeholder="e.g., 10" min="1" max="50">
+            </div>
+            <div class="form-group">
+                <label>Total Marks *</label>
+                <input type="number" id="totalMarks" placeholder="e.g., 100" min="10" max="500">
+            </div>
+            <div class="form-group">
+                <label>Exam Duration</label>
+                <select id="duration">
+                    <option value="1 Hour">1 Hour</option>
+                    <option value="1.5 Hours">1.5 Hours</option>
+                    <option value="2 Hours">2 Hours</option>
+                    <option value="3 Hours" selected>3 Hours</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Difficulty Level</label>
+                <select id="difficulty">
+                    <option value="Easy">Easy</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="Hard">Hard</option>
+                    <option value="Mixed">Mixed (Easy + Medium + Hard)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Semester / Year</label>
+                <input type="text" id="semester" placeholder="e.g., 5th Semester / 3rd Year">
+            </div>
+            <div class="form-group">
+                <label>Department / Branch</label>
+                <input type="text" id="department" placeholder="e.g., Computer Science">
+            </div>
+        </div>
+
+        <h3>📖 Syllabus / Topics *</h3>
+        <div class="form-group">
+            <textarea id="syllabus" rows="5" placeholder="Enter the topics or syllabus to be covered in this exam. Be as detailed as possible for better questions.&#10;&#10;Example:&#10;Unit 1: Arrays, Linked Lists, Stacks, Queues&#10;Unit 2: Trees - Binary Tree, BST, AVL Trees&#10;Unit 3: Graphs - BFS, DFS, Shortest Path Algorithms&#10;Unit 4: Sorting - Bubble, Merge, Quick Sort&#10;Unit 5: Hashing and Heaps"></textarea>
+            <div class="hint">💡 Tip: More detailed syllabus = better and more relevant questions</div>
+        </div>
+
+        <h3>🗂️ Question Sections (Optional)</h3>
+        <div class="section-config">
+            <div class="section-box">
+                <h4>Section A — Short Answer</h4>
+                <label style="font-size:0.82rem;color:#666">Number of questions</label>
+                <input type="number" id="sectionA" placeholder="e.g., 5" min="0">
+                <label style="font-size:0.82rem;color:#666;margin-top:6px;display:block">Marks each</label>
+                <input type="number" id="sectionAMarks" placeholder="e.g., 2" min="0">
+            </div>
+            <div class="section-box">
+                <h4>Section B — Medium Answer</h4>
+                <label style="font-size:0.82rem;color:#666">Number of questions</label>
+                <input type="number" id="sectionB" placeholder="e.g., 3" min="0">
+                <label style="font-size:0.82rem;color:#666;margin-top:6px;display:block">Marks each</label>
+                <input type="number" id="sectionBMarks" placeholder="e.g., 10" min="0">
+            </div>
+            <div class="section-box">
+                <h4>Section C — Long Answer</h4>
+                <label style="font-size:0.82rem;color:#666">Number of questions</label>
+                <input type="number" id="sectionC" placeholder="e.g., 2" min="0">
+                <label style="font-size:0.82rem;color:#666;margin-top:6px;display:block">Marks each</label>
+                <input type="number" id="sectionCMarks" placeholder="e.g., 20" min="0">
+            </div>
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:center;margin-top:8px;">
+            <button class="btn-generate" id="generateBtn" onclick="generatePaper()">✨ Generate Exam Paper</button>
+            <button class="btn-action" onclick="clearForm()">🔄 Clear</button>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" id="loadingDiv">
+        <div class="spinner"></div>
+        <p style="color:#555;font-weight:600;">🧠 AI is generating your exam paper...</p>
+        <p style="color:#999;font-size:0.85rem;">This may take 10–20 seconds</p>
+    </div>
+
+    <!-- Generated Paper Result -->
+    <div id="paperResult">
+        <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                <h3 style="margin:0;">📄 Generated Exam Paper</h3>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <span class="tag" id="tagSubject"></span>
+                    <span class="marks-badge" id="tagMarks"></span>
+                </div>
+            </div>
+            <div class="paper-box" id="paperContent"></div>
+            <div class="paper-actions">
+                <button class="btn-action" onclick="printPaper()">🖨️ Print</button>
+                <button class="btn-action" onclick="copyPaper()">📋 Copy</button>
+                <button class="btn-action" onclick="downloadPaper()">⬇️ Download .txt</button>
+                <button class="btn-action" onclick="generatePaper()">🔁 Regenerate</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function generatePaper() {
+    const subject = document.getElementById('subject').value.trim();
+    const syllabus = document.getElementById('syllabus').value.trim();
+    const totalQ = document.getElementById('totalQuestions').value;
+    const totalM = document.getElementById('totalMarks').value;
+
+    if (!subject || !syllabus || !totalQ || !totalM) {
+        alert('Please fill in: Subject, Total Questions, Total Marks, and Syllabus/Topics.');
+        return;
+    }
+
+    const courseCode = document.getElementById('courseCode').value || 'N/A';
+    const duration = document.getElementById('duration').value;
+    const difficulty = document.getElementById('difficulty').value;
+    const semester = document.getElementById('semester').value || 'N/A';
+    const dept = document.getElementById('department').value || 'N/A';
+    const sA = document.getElementById('sectionA').value;
+    const sAM = document.getElementById('sectionAMarks').value;
+    const sB = document.getElementById('sectionB').value;
+    const sBM = document.getElementById('sectionBMarks').value;
+    const sC = document.getElementById('sectionC').value;
+    const sCM = document.getElementById('sectionCMarks').value;
+
+    let sectionInstructions = '';
+    if (sA || sB || sC) {
+        sectionInstructions = `\nOrganize into sections:`;
+        if (sA && sAM) sectionInstructions += `\n- Section A: ${sA} Short-Answer questions, ${sAM} marks each`;
+        if (sB && sBM) sectionInstructions += `\n- Section B: ${sB} Medium-Answer questions, ${sBM} marks each`;
+        if (sC && sCM) sectionInstructions += `\n- Section C: ${sC} Long-Answer questions, ${sCM} marks each`;
+    }
+
+    const prompt = `Generate a complete formal university exam paper with the following specifications:
+
+Subject: ${subject}
+Course Code: ${courseCode}
+Department: ${dept}
+Semester: ${semester}
+Total Questions: ${totalQ}
+Total Marks: ${totalM}
+Duration: ${duration}
+Difficulty: ${difficulty}
+${sectionInstructions}
+
+Syllabus / Topics:
+${syllabus}
+
+Requirements:
+1. Start with a formal header (University Exam, subject, code, date placeholder, time, max marks)
+2. Include General Instructions (attempt all/any, marks in brackets, etc.)
+3. Generate exactly ${totalQ} questions covering the given syllabus
+4. Each question should clearly show marks in brackets e.g. [5 marks]
+5. Ensure total marks add up to ${totalM}
+6. Difficulty should be ${difficulty}
+7. Questions should be varied: definitions, explain, compare, solve, design, etc.
+8. Format it professionally like a real university exam paper`;
+
+    document.getElementById('loadingDiv').style.display = 'block';
+    document.getElementById('paperResult').style.display = 'none';
+    document.getElementById('generateBtn').disabled = true;
+
+    try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: 'claude-sonnet-4-20250514',
+                max_tokens: 3000,
+                messages: [{ role: 'user', content: prompt }]
+            })
+        });
+        const data = await response.json();
+        const paper = data.content.map(b => b.text || '').join('');
+
+        document.getElementById('paperContent').textContent = paper;
+        document.getElementById('tagSubject').textContent = subject;
+        document.getElementById('tagMarks').textContent = totalM + ' Marks';
+        document.getElementById('paperResult').style.display = 'block';
+        document.getElementById('paperResult').scrollIntoView({ behavior: 'smooth' });
+    } catch (err) {
+        alert('Error generating paper. Please try again.\n' + err.message);
+    } finally {
+        document.getElementById('loadingDiv').style.display = 'none';
+        document.getElementById('generateBtn').disabled = false;
+    }
+}
+
+function printPaper() {
+    const content = document.getElementById('paperContent').textContent;
+    const w = window.open('', '_blank');
+    w.document.write('<pre style="font-family:serif;line-height:1.8;padding:30px;font-size:13px;">' + content + '</pre>');
+    w.print();
+}
+
+function copyPaper() {
+    navigator.clipboard.writeText(document.getElementById('paperContent').textContent)
+        .then(() => alert('Paper copied to clipboard!'));
+}
+
+function downloadPaper() {
+    const subject = document.getElementById('subject').value || 'exam';
+    const text = document.getElementById('paperContent').textContent;
+    const blob = new Blob([text], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = subject.replace(/\s+/g, '_') + '_exam_paper.txt';
+    a.click();
+}
+
+function clearForm() {
+    ['subject','courseCode','totalQuestions','totalMarks','semester','department','syllabus',
+     'sectionA','sectionAMarks','sectionB','sectionBMarks','sectionC','sectionCMarks']
+    .forEach(id => document.getElementById(id).value = '');
+    document.getElementById('paperResult').style.display = 'none';
+}
+</script>
+</body>
+</html>
