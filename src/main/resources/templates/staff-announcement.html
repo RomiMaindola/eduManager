@@ -27,66 +27,88 @@
         .ann-meta { font-size: 0.8rem; color: #999; }
         .ann-badge { position: absolute; top: 14px; right: 14px; padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: bold; }
         .badge-all { background: #e8edf8; color: #1e3c72; }
-        .badge-5th { background: #d4edda; color: #155724; }
+        .badge-sem { background: #d4edda; color: #155724; }
         .del-btn { position: absolute; bottom: 12px; right: 14px; color: #e74c3c; border: none; background: none; cursor: pointer; font-size: 1rem; }
+        .alert-success { background: #d4edda; color: #155724; padding: 10px 16px; border-radius: 8px; margin-bottom: 14px; }
     </style>
 </head>
 <body>
 <div class="sidebar">
     <h2>👨‍🏫 EduManager Staff</h2>
-    <a href="/staff/dashboard">🏠 Dashboard</a>
-    <a href="/staff/attendance">📋 Attendance</a>
-    <a href="/staff/notes">📚 Upload Notes</a>
-    <a href="/staff/result">📊 Results</a>
-    <a href="/staff/announcement" class="active">📢 Announcements</a>
-    <a href="/staff/leave">🗓️ Leave</a>
-    <a href="/staff/generate-exam">🧠 Generate Exam</a>
-    <a href="/staff/logout" class="logout-btn">🚪 Logout</a>
+    <a th:href="@{/staff/dashboard}">🏠 Dashboard</a>
+    <a th:href="@{/staff/attendance}">📋 Attendance</a>
+    <a th:href="@{/staff/notes}">📚 Upload Notes</a>
+    <a th:href="@{/staff/result}">📊 Results</a>
+    <a th:href="@{/staff/announcement}" class="active">📢 Announcements</a>
+    <a th:href="@{/staff/leave}">🗓️ Leave</a>
+    <a th:href="@{/staff/generate-exam}">🧠 Generate Exam</a>
+    <a th:href="@{/staff/logout}" class="logout-btn">🚪 Logout</a>
 </div>
 <div class="main">
     <div class="page-title">📢 Announcements</div>
     <div class="page-sub">Post notices and important messages to students.</div>
+
+    <!-- Success banner -->
+    <div class="alert-success" th:if="${param.success}">✅ Announcement posted successfully!</div>
+
+    <!-- Post Announcement Form -->
     <div class="card">
         <h3>✍️ Post New Announcement</h3>
-        <div class="form-group"><label>Title *</label><input type="text" id="annTitle" placeholder="e.g., Unit Test Schedule - May 2026"></div>
-        <div class="form-row">
-            <div class="form-group"><label>Audience</label>
-                <select id="annAud"><option>All Students</option><option>5th Semester</option><option>3rd Semester</option><option>7th Semester</option></select></div>
-            <div class="form-group"><label>Priority</label>
-                <select id="annPrio"><option>Normal</option><option>Urgent</option><option>Important</option></select></div>
-        </div>
-        <div class="form-group"><label>Message *</label><textarea id="annMsg" rows="4" placeholder="Write your announcement here..."></textarea></div>
-        <button class="btn-primary" onclick="postAnn()">📢 Post Announcement</button>
+        <form th:action="@{/staff/announcement}" method="post">
+            <div class="form-group">
+                <label>Title *</label>
+                <input type="text" name="title" placeholder="e.g., Unit Test Schedule - May 2026" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Audience</label>
+                    <select name="audience">
+                        <option value="All Students">All Students</option>
+                        <option value="5th Semester">5th Semester</option>
+                        <option value="3rd Semester">3rd Semester</option>
+                        <option value="7th Semester">7th Semester</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select name="priority">
+                        <option value="Normal">Normal</option>
+                        <option value="Urgent">Urgent</option>
+                        <option value="Important">Important</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Message *</label>
+                <textarea name="content" rows="4" placeholder="Write your announcement here..." required></textarea>
+            </div>
+            <button class="btn-primary" type="submit">📢 Post Announcement</button>
+        </form>
     </div>
+
+    <!-- Previous Announcements from DB -->
     <div class="card">
         <h3>📋 Previous Announcements</h3>
         <div class="ann-list">
-            <div class="ann-item">
-                <h4>📅 End Semester Exam Schedule Released</h4>
-                <p>The end-semester examination schedule for all subjects has been released. Please check the notice board and prepare accordingly.</p>
-                <div class="ann-meta">Posted on 22 Apr 2026 · by Dr. Sharma</div>
-                <span class="ann-badge badge-all">All Students</span>
-                <button class="del-btn">🗑️</button>
+            <div class="ann-item" th:each="ann : ${announcements}">
+                <h4 th:text="${ann.title}">Title</h4>
+                <p th:text="${ann.content}">Content</p>
+                <div class="ann-meta">
+                    Posted on <span th:text="${#temporals.format(ann.createdAt, 'dd MMM yyyy')}">Date</span>
+                    · by <span th:text="${ann.createdBy.name}">Staff Name</span>
+                </div>
+                <span class="ann-badge"
+                      th:classappend="${ann.audience == 'All Students'} ? 'badge-all' : 'badge-sem'"
+                      th:text="${ann.audience}">All Students</span>
+                <!-- Delete button posts to /staff/announcement/delete/{id} -->
+                <form th:action="@{/staff/announcement/delete/{id}(id=${ann.id})}" method="post" style="display:inline;">
+                    <button class="del-btn" type="submit">🗑️</button>
+                </form>
             </div>
-            <div class="ann-item">
-                <h4>📝 Assignment Submission Deadline Extended</h4>
-                <p>The deadline for submitting the Data Structures assignment (Unit 3) has been extended to 30th April 2026.</p>
-                <div class="ann-meta">Posted on 20 Apr 2026 · by Dr. Sharma</div>
-                <span class="ann-badge badge-5th">5th Semester</span>
-                <button class="del-btn">🗑️</button>
-            </div>
+            <!-- Empty state -->
+            <p th:if="${#lists.isEmpty(announcements)}" style="color:#999;">No announcements posted yet.</p>
         </div>
     </div>
 </div>
-<script>
-function postAnn(){
-    const t=document.getElementById('annTitle').value.trim();
-    const m=document.getElementById('annMsg').value.trim();
-    if(!t||!m){alert('Please fill title and message.');return;}
-    alert('Announcement posted successfully!');
-    document.getElementById('annTitle').value='';
-    document.getElementById('annMsg').value='';
-}
-</script>
 </body>
 </html>

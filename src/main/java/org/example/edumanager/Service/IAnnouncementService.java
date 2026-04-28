@@ -16,6 +16,13 @@ public interface IAnnouncementService {
     // Student view: all announcements newest-first
     List<Announcement> findAllNewestFirst();
 
+    /**
+     * Student view: announcements relevant to a specific student.
+     * Returns "All Students" announcements + semester-specific ones (e.g. "5th Semester").
+     * Used by student-announcement.html to only show relevant posts.
+     */
+    List<Announcement> findForStudent(String studentSemester);
+
     // Staff view: their own announcements
     List<Announcement> findByStaff(Staff staff);
     List<Announcement> findByStaffId(Long staffId);

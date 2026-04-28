@@ -24,6 +24,14 @@ public class AnnouncementServiceImp implements IAnnouncementService {
         if (announcement.getCreatedAt() == null) {
             announcement.setCreatedAt(LocalDateTime.now());
         }
+        // Default audience to "All Students" if not provided
+        if (announcement.getAudience() == null || announcement.getAudience().isBlank()) {
+            announcement.setAudience("All Students");
+        }
+        // Default priority to "Normal" if not provided
+        if (announcement.getPriority() == null || announcement.getPriority().isBlank()) {
+            announcement.setPriority("Normal");
+        }
         return announcementRepository.save(announcement);
     }
 
@@ -40,6 +48,19 @@ public class AnnouncementServiceImp implements IAnnouncementService {
     @Override
     public List<Announcement> findAllNewestFirst() {
         return announcementRepository.findAllByOrderByCreatedAtDesc();
+    }
+
+    /**
+     * Returns announcements visible to a student in a given semester.
+     * Includes "All Students" audience + their specific semester (e.g. "5th Semester").
+     * Matches the audience dropdown values in staff-announcement.html.
+     */
+    @Override
+    public List<Announcement> findForStudent(String studentSemester) {
+        // Build audience list: global + semester-specific
+        String semesterLabel = studentSemester + " Semester"; // e.g. "5th Semester"
+        List<String> audiences = List.of("All Students", semesterLabel);
+        return announcementRepository.findByAudienceInOrderByCreatedAtDesc(audiences);
     }
 
     @Override

@@ -27,4 +27,6 @@ public class Announcement {
 
     // Templates show priority (Normal / Urgent / Important)
     private String priority;
+
+    private String audience;
 }

@@ -19,67 +19,102 @@
         .form-group { display: flex; flex-direction: column; gap: 5px; }
         .form-group label { font-weight: 600; color: #555; font-size: 0.88rem; }
         .form-group input, .form-group select { padding: 9px 12px; border: 1.5px solid #dde1e7; border-radius: 8px; font-size: 0.9rem; outline: none; }
-        .form-group input:focus, .form-group select:focus { border-color: #1e3c72; }
         .btn-primary { background: linear-gradient(135deg,#1e3c72,#2a5298); color: white; padding: 10px 22px; border: none; border-radius: 8px; font-size: 0.92rem; font-weight: bold; cursor: pointer; }
         table { width: 100%; border-collapse: collapse; }
         th { background: #1e3c72; color: white; padding: 11px; text-align: left; font-size: 0.88rem; }
         td { padding: 11px; border-bottom: 1px solid #eee; font-size: 0.88rem; }
         tr:hover td { background: #f8f9fb; }
-        td input { width: 70px; padding: 5px 8px; border: 1.5px solid #dde1e7; border-radius: 6px; font-size: 0.88rem; }
-        .grade { font-weight: bold; }
-        .grade-A { color: #27ae60; } .grade-B { color: #2980b9; } .grade-C { color: #e67e22; } .grade-F { color: #e74c3c; }
+        td input[type="number"] { width: 80px; padding: 5px 8px; border: 1.5px solid #dde1e7; border-radius: 6px; }
         .btn-save { background: #27ae60; color: white; padding: 10px 22px; border: none; border-radius: 8px; font-size: 0.92rem; font-weight: bold; cursor: pointer; margin-top: 12px; }
+        .alert-success { background: #d4edda; color: #155724; padding: 10px 16px; border-radius: 8px; margin-bottom: 14px; }
     </style>
 </head>
 <body>
 <div class="sidebar">
     <h2>👨‍🏫 EduManager Staff</h2>
-    <a href="/staff/dashboard">🏠 Dashboard</a>
-    <a href="/staff/attendance">📋 Attendance</a>
-    <a href="/staff/notes">📚 Upload Notes</a>
-    <a href="/staff/result" class="active">📊 Results</a>
-    <a href="/staff/announcement">📢 Announcements</a>
-    <a href="/staff/leave">🗓️ Leave</a>
-    <a href="/staff/generate-exam">🧠 Generate Exam</a>
-    <a href="/staff/logout" class="logout-btn">🚪 Logout</a>
+    <a th:href="@{/staff/dashboard}">🏠 Dashboard</a>
+    <a th:href="@{/staff/attendance}">📋 Attendance</a>
+    <a th:href="@{/staff/notes}">📚 Upload Notes</a>
+    <a th:href="@{/staff/result}" class="active">📊 Results</a>
+    <a th:href="@{/staff/announcement}">📢 Announcements</a>
+    <a th:href="@{/staff/leave}">🗓️ Leave</a>
+    <a th:href="@{/staff/generate-exam}">🧠 Generate Exam</a>
+    <a th:href="@{/staff/logout}" class="logout-btn">🚪 Logout</a>
 </div>
 <div class="main">
     <div class="page-title">📊 Enter / View Results</div>
     <div class="page-sub">Enter marks and manage student results by subject.</div>
+
+    <div class="alert-success" th:if="${param.saved}">✅ Results saved successfully!</div>
+
+    <!-- Filter Form: GET /staff/result/load -->
     <div class="card">
         <h3>🔍 Select Exam</h3>
-        <div class="form-row">
-            <div class="form-group"><label>Subject</label>
-                <select><option>Data Structures</option><option>OS</option><option>DBMS</option></select></div>
-            <div class="form-group"><label>Exam Type</label>
-                <select><option>Mid-Sem</option><option>End-Sem</option><option>Internal</option></select></div>
-            <div class="form-group"><label>Semester</label>
-                <select><option>5th Sem</option><option>3rd Sem</option><option>7th Sem</option></select></div>
-        </div>
-        <button class="btn-primary" onclick="loadResults()">Load Students</button>
+        <form th:action="@{/staff/result/load}" method="get">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Subject</label>
+                    <select name="subjectId" required>
+                        <option value="" disabled th:unless="${selectedSubjectId}">-- Select --</option>
+                        <option th:each="sub : ${subjects}"
+                                th:value="${sub.id}"
+                                th:text="${sub.subjectName}"
+                                th:selected="${sub.id == selectedSubjectId}">
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Exam Type</label>
+                    <select name="examType">
+                        <option value="Mid-Sem"  th:selected="${selectedExamType == 'Mid-Sem'}">Mid-Sem</option>
+                        <option value="End-Sem"  th:selected="${selectedExamType == 'End-Sem'}">End-Sem</option>
+                        <option value="Internal" th:selected="${selectedExamType == 'Internal'}">Internal</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Semester</label>
+                    <select name="semester">
+                        <option value="5th" th:selected="${selectedSemester == '5th'}">5th Sem</option>
+                        <option value="3rd" th:selected="${selectedSemester == '3rd'}">3rd Sem</option>
+                        <option value="7th" th:selected="${selectedSemester == '7th'}">7th Sem</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn-primary" type="submit">Load Students</button>
+        </form>
     </div>
-    <div class="card" id="resultsCard" style="display:none;">
+
+    <!-- Marks Entry Table: shown after students are loaded -->
+    <div class="card" th:if="${students != null and !#lists.isEmpty(students)}">
         <h3>📝 Enter Marks</h3>
-        <table>
-            <thead><tr><th>#</th><th>Admission No</th><th>Name</th><th>Marks (out of 100)</th><th>Grade</th></tr></thead>
-            <tbody id="resultsBody"></tbody>
-        </table>
-        <button class="btn-save" onclick="alert('Results saved!')">💾 Save Results</button>
+        <!-- Save marks form: POST /staff/result/save -->
+        <form th:action="@{/staff/result/save}" method="post">
+            <input type="hidden" name="subjectId"  th:value="${selectedSubjectId}">
+            <input type="hidden" name="semester"   th:value="${selectedSemester}">
+            <input type="hidden" name="examType"   th:value="${selectedExamType}">
+            <table>
+                <thead>
+                <tr><th>#</th><th>Admission No</th><th>Name</th><th>Marks (out of 100)</th><th>Grade</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="student, iter : ${students}">
+                    <td th:text="${iter.count}">1</td>
+                    <td th:text="${student.admissionNo}">ADM001</td>
+                    <td th:text="${student.name}">Name</td>
+                    <td>
+                        <input type="hidden" name="studentIds" th:value="${student.id}">
+                        <!-- Pre-fill marks if already entered -->
+                        <input type="number" name="marksList" min="0" max="100" placeholder="0-100"
+                               th:value="${existingResults != null ?
+                                               existingResults.?[student.id == student.id].![marks][0] : ''}">
+                    </td>
+                    <td>—</td>
+                </tr>
+                </tbody>
+            </table>
+            <button class="btn-save" type="submit">💾 Save Results</button>
+        </form>
     </div>
 </div>
-<script>
-const students=[{no:'ADM001',name:'Aakash Sharma'},{no:'ADM002',name:'Priya Verma'},{no:'ADM003',name:'Rahul Gupta'},{no:'ADM004',name:'Sneha Patel'}];
-function getGrade(m){ if(m>=85) return '<span class="grade grade-A">A</span>'; if(m>=70) return '<span class="grade grade-B">B</span>'; if(m>=50) return '<span class="grade grade-C">C</span>'; return '<span class="grade grade-F">F</span>'; }
-function loadResults(){
-    const tbody=document.getElementById('resultsBody'); tbody.innerHTML='';
-    students.forEach((s,i)=>{
-        tbody.innerHTML+=`<tr><td>${i+1}</td><td>${s.no}</td><td>${s.name}</td>
-        <td><input type="number" min="0" max="100" placeholder="0-100" oninput="updateGrade(this,'grade_${i}')"></td>
-        <td id="grade_${i}">—</td></tr>`;
-    });
-    document.getElementById('resultsCard').style.display='block';
-}
-function updateGrade(input,gId){ document.getElementById(gId).innerHTML=input.value?getGrade(parseInt(input.value)):'—'; }
-</script>
 </body>
 </html>
