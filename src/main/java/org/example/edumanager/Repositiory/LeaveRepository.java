@@ -4,9 +4,10 @@ import org.example.edumanager.entity.LeaveApplication;
 import org.example.edumanager.entity.Staff;
 import org.example.edumanager.entity.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
-
+@Repository
 public interface LeaveRepository extends JpaRepository<LeaveApplication, Long> {
 
     // --- Student leave history (student-leave.html) ---

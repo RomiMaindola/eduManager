@@ -4,10 +4,11 @@ import org.example.edumanager.entity.Result;
 import org.example.edumanager.entity.Student;
 import org.example.edumanager.entity.Subject;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-
+@Repository
 public interface ResultRepository extends JpaRepository<Result, Long> {
 
     // Student views their results (student-result.html — subject-wise table)
