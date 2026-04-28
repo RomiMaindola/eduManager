@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Staff Dashboard</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: #eef2f7;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            height: 100vh;
+            background: #1e3c72;
+            color: white;
+            position: fixed;
+            padding-top: 20px;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 12px;
+            color: white;
+            text-decoration: none;
+        }
+
+        .sidebar a:hover {
+            background: #2a5298;
+        }
+
+        /* Main */
+        .main {
+            margin-left: 240px;
+            padding: 20px;
+        }
+
+        /* Profile */
+        .profile-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .label {
+            font-weight: bold;
+        }
+
+        /* Sections */
+        .section {
+            margin-top: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        /* AI Box */
+        .ai-box {
+            background: linear-gradient(135deg, #ff512f, #dd2476);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>👨‍🏫 Staff</h2>
+    <a href="#">Dashboard</a>
+    <a href="#">Attendance</a>
+    <a href="#">Upload Notes</a>
+    <a href="#">Results</a>
+    <a href="#">Announcements</a>
+    <a href="#">Leave</a>
+</div>
+
+<div class="main">
+
+    <h2>Welcome, <span th:text="${staff.name}"></span></h2>
+
+    <div class="profile-card">
+        <h3>Profile Information</h3>
+        <div class="grid">
+            <div><span class="label">Name:</span> <span th:text="${staff.name}"></span></div>
+            <div><span class="label">Email:</span> <span th:text="${staff.email}"></span></div>
+            <div><span class="label">Staff No:</span> <span th:text="${staff.staffNo}"></span></div>
+            <div><span class="label">Department:</span> <span th:text="${staff.department}"></span></div>
+        </div>
+    </div>
+
+    <!-- AI EXAM GENERATOR -->
+    <div class="section ai-box">
+        <h3>🧠 Generate Semester Exam Paper</h3>
+        <p>Enter units and generate question paper using AI.</p>
+
+        <form action="/staff/generate-paper" method="post">
+            <input type="text" name="subject" placeholder="Subject Name" required><br><br>
+            <input type="text" name="units" placeholder="Enter Units (e.g., Unit 1,2,3)" required><br><br>
+            <button type="submit">Generate Paper</button>
+        </form>
+    </div>
+
+    <div class="section">
+        <h3>Quick Actions</h3>
+        <p>Use sidebar to manage attendance, notes, results, and more.</p>
+    </div>
+
+</div>
+
+</body>
+</html>

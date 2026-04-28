@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Study Notes</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f9; }
+        .sidebar { width: 220px; height: 100vh; background: linear-gradient(180deg,#2c3e50,#34495e); color: white; position: fixed; padding-top: 20px; display: flex; flex-direction: column; }
+        .sidebar h2 { text-align: center; margin-bottom: 30px; font-size: 1.1rem; }
+        .sidebar a { display: flex; align-items: center; gap: 10px; padding: 13px 18px; color: white; text-decoration: none; font-size: 0.92rem; transition: background 0.2s; }
+        .sidebar a:hover, .sidebar a.active { background: rgba(255,255,255,0.15); border-left: 3px solid #fff; }
+        .sidebar .logout-btn { margin-top: auto; background: rgba(255,0,0,0.2); }
+        .main { margin-left: 220px; padding: 25px; }
+        .page-title { font-size: 1.6rem; font-weight: bold; color: #2c3e50; margin-bottom: 5px; }
+        .page-sub { color: #777; margin-bottom: 20px; }
+        .filter-bar { display: flex; gap: 12px; margin-bottom: 20px; }
+        .filter-bar select, .filter-bar input { padding: 9px 14px; border: 1.5px solid #dde1e7; border-radius: 8px; font-size: 0.92rem; outline: none; }
+        .notes-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+        .note-card { background: white; border-radius: 14px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); transition: transform 0.2s; border-top: 4px solid; }
+        .note-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+        .note-card:nth-child(1){ border-color: #2c3e50; } .note-card:nth-child(2){ border-color: #27ae60; } .note-card:nth-child(3){ border-color: #e67e22; } .note-card:nth-child(4){ border-color: #9b59b6; } .note-card:nth-child(5){ border-color: #2980b9; } .note-card:nth-child(6){ border-color: #e74c3c; }
+        .note-icon { font-size: 2rem; margin-bottom: 10px; }
+        .note-title { font-weight: bold; color: #333; margin-bottom: 5px; }
+        .note-sub { font-size: 0.82rem; color: #777; margin-bottom: 10px; }
+        .note-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #999; }
+        .download-btn { background: #2c3e50; color: white; padding: 6px 14px; border: none; border-radius: 6px; font-size: 0.82rem; cursor: pointer; text-decoration: none; display: inline-block; }
+        .download-btn:hover { background: #34495e; }
+        .badge { padding: 3px 8px; border-radius: 10px; font-size: 0.77rem; background: #e8edf8; color: #2c3e50; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <h2>🎓 EduManager</h2>
+    <a href="/student/dashboard">🏠 Dashboard</a>
+    <a href="/student/attendance">📋 Attendance</a>
+    <a href="/student/notes" class="active">📚 Notes</a>
+    <a href="/student/result">📊 Results</a>
+    <a href="/student/announcement">📢 Announcements</a>
+    <a href="/student/leave">🗓️ Leave</a>
+    <a href="/student/profile">👤 Profile</a>
+    <a href="/student/logout" class="logout-btn">🚪 Logout</a>
+</div>
+<div class="main">
+    <div class="page-title">📚 Study Notes</div>
+    <div class="page-sub">Access lecture notes and study materials uploaded by your teachers.</div>
+    <div class="filter-bar">
+        <select><option>All Subjects</option><option>Data Structures</option><option>OS</option><option>DBMS</option><option>CN</option></select>
+        <input type="text" placeholder="🔍 Search notes...">
+    </div>
+    <div class="notes-grid">
+        <div class="note-card">
+            <div class="note-icon">📄</div>
+            <div class="note-title">Unit 1 - Arrays & Linked Lists</div>
+            <div class="note-sub"><span class="badge">Data Structures</span></div>
+            <div class="note-meta"><span>20 Apr 2026</span><a href="#" class="download-btn">⬇️ Download</a></div>
+        </div>
+        <div class="note-card">
+            <div class="note-icon">📘</div>
+            <div class="note-title">Process Scheduling Algorithms</div>
+            <div class="note-sub"><span class="badge">Operating Systems</span></div>
+            <div class="note-meta"><span>18 Apr 2026</span><a href="#" class="download-btn">⬇️ Download</a></div>
+        </div>
+        <div class="note-card">
+            <div class="note-icon">📗</div>
+            <div class="note-title">SQL Joins and Normalization</div>
+            <div class="note-sub"><span class="badge">DBMS</span></div>
+            <div class="note-meta"><span>15 Apr 2026</span><a href="#" class="download-btn">⬇️ Download</a></div>
+        </div>
+        <div class="note-card">
+            <div class="note-icon">📕</div>
+            <div class="note-title">TCP/IP Protocol Stack</div>
+            <div class="note-sub"><span class="badge">Computer Networks</span></div>
+            <div class="note-meta"><span>12 Apr 2026</span><a href="#" class="download-btn">⬇️ Download</a></div>
+        </div>
+        <div class="note-card">
+            <div class="note-icon">📙</div>
+            <div class="note-title">Unit 3 - Trees and Graphs</div>
+            <div class="note-sub"><span class="badge">Data Structures</span></div>
+            <div class="note-meta"><span>10 Apr 2026</span><a href="#" class="download-btn">⬇️ Download</a></div>
+        </div>
+        <div class="note-card">
+            <div class="note-icon">📓</div>
+            <div class="note-title">SDLC Models - Waterfall, Agile</div>
+            <div class="note-sub"><span class="badge">Software Engineering</span></div>
+            <div class="note-meta"><span>08 Apr 2026</span><a href="#" class="download-btn">⬇️ Download</a></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Upload Notes</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #eef2f7; }
+        .sidebar { width: 240px; height: 100vh; background: linear-gradient(180deg,#1e3c72,#2a5298); color: white; position: fixed; padding-top: 20px; display: flex; flex-direction: column; }
+        .sidebar h2 { text-align: center; margin-bottom: 30px; font-size: 1.1rem; }
+        .sidebar a { display: flex; align-items: center; gap: 10px; padding: 13px 20px; color: white; text-decoration: none; font-size: 0.95rem; transition: background 0.2s; }
+        .sidebar a:hover, .sidebar a.active { background: rgba(255,255,255,0.15); border-left: 3px solid #fff; }
+        .sidebar .logout-btn { margin-top: auto; background: rgba(255,0,0,0.2); }
+        .main { margin-left: 240px; padding: 25px; }
+        .page-title { font-size: 1.6rem; font-weight: bold; color: #1e3c72; margin-bottom: 5px; }
+        .page-sub { color: #777; margin-bottom: 20px; }
+        .card { background: white; border-radius: 14px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .card h3 { margin-top: 0; color: #1e3c72; border-bottom: 2px solid #eef2f7; padding-bottom: 10px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-weight: 600; color: #555; font-size: 0.9rem; }
+        .form-group input, .form-group select, .form-group textarea { padding: 10px 14px; border: 1.5px solid #dde1e7; border-radius: 8px; font-size: 0.95rem; outline: none; font-family: inherit; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #1e3c72; }
+        .upload-zone { border: 2px dashed #b0bec5; border-radius: 12px; padding: 40px; text-align: center; cursor: pointer; background: #fafbfc; transition: border 0.2s; }
+        .upload-zone:hover { border-color: #1e3c72; background: #eef2f7; }
+        .upload-zone .icon { font-size: 3rem; margin-bottom: 10px; }
+        .upload-zone p { color: #777; margin: 0; }
+        .btn-primary { background: linear-gradient(135deg,#1e3c72,#2a5298); color: white; padding: 11px 26px; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer; margin-top: 8px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #1e3c72; color: white; padding: 12px; text-align: left; font-size: 0.9rem; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+        tr:hover td { background: #f8f9fb; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; background: #e8edf8; color: #1e3c72; }
+        .del-btn { color: #e74c3c; cursor: pointer; font-size: 1.1rem; border: none; background: none; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <h2>👨‍🏫 EduManager Staff</h2>
+    <a href="/staff/dashboard">🏠 Dashboard</a>
+    <a href="/staff/attendance">📋 Attendance</a>
+    <a href="/staff/notes" class="active">📚 Upload Notes</a>
+    <a href="/staff/result">📊 Results</a>
+    <a href="/staff/announcement">📢 Announcements</a>
+    <a href="/staff/leave">🗓️ Leave</a>
+    <a href="/staff/generate-exam">🧠 Generate Exam</a>
+    <a href="/staff/logout" class="logout-btn">🚪 Logout</a>
+</div>
+<div class="main">
+    <div class="page-title">📚 Upload Study Notes</div>
+    <div class="page-sub">Upload lecture notes and materials for your students.</div>
+    <div class="card">
+        <h3>📤 Upload New Notes</h3>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Title *</label>
+                <input type="text" placeholder="e.g., Unit 3 - Trees and Graphs">
+            </div>
+            <div class="form-group">
+                <label>Subject *</label>
+                <select><option>Data Structures</option><option>OS</option><option>DBMS</option><option>CN</option></select>
+            </div>
+            <div class="form-group">
+                <label>Semester</label>
+                <select><option>5th Sem</option><option>3rd Sem</option><option>7th Sem</option></select>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <input type="text" placeholder="Brief description of the notes">
+            </div>
+        </div>
+        <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+            <div class="icon">📂</div>
+            <p><strong>Click to upload</strong> or drag & drop</p>
+            <p style="font-size:0.82rem;margin-top:6px;">PDF, PPT, DOCX, images supported (Max 10MB)</p>
+            <input type="file" id="fileInput" style="display:none" accept=".pdf,.ppt,.pptx,.doc,.docx,.png,.jpg">
+        </div>
+        <button class="btn-primary" onclick="alert('Notes uploaded successfully!')">📤 Upload Notes</button>
+    </div>
+    <div class="card">
+        <h3>📋 Uploaded Notes</h3>
+        <table>
+            <thead><tr><th>#</th><th>Title</th><th>Subject</th><th>Sem</th><th>Uploaded On</th><th>Action</th></tr></thead>
+            <tbody>
+                <tr><td>1</td><td>Unit 1 - Arrays & Linked Lists</td><td><span class="badge">Data Structures</span></td><td>5th</td><td>20 Apr 2026</td><td><button class="del-btn">🗑️</button></td></tr>
+                <tr><td>2</td><td>Process Scheduling Algorithms</td><td><span class="badge">OS</span></td><td>5th</td><td>18 Apr 2026</td><td><button class="del-btn">🗑️</button></td></tr>
+                <tr><td>3</td><td>SQL Joins and Normalization</td><td><span class="badge">DBMS</span></td><td>5th</td><td>15 Apr 2026</td><td><button class="del-btn">🗑️</button></td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

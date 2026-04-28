@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>My Attendance</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f9; }
+        .sidebar { width: 220px; height: 100vh; background: linear-gradient(180deg,#2c3e50,#34495e); color: white; position: fixed; padding-top: 20px; display: flex; flex-direction: column; }
+        .sidebar h2 { text-align: center; margin-bottom: 30px; font-size: 1.1rem; }
+        .sidebar a { display: flex; align-items: center; gap: 10px; padding: 13px 18px; color: white; text-decoration: none; font-size: 0.92rem; transition: background 0.2s; }
+        .sidebar a:hover, .sidebar a.active { background: rgba(255,255,255,0.15); border-left: 3px solid #fff; }
+        .sidebar .logout-btn { margin-top: auto; background: rgba(255,0,0,0.2); }
+        .main { margin-left: 220px; padding: 25px; }
+        .page-title { font-size: 1.6rem; font-weight: bold; color: #2c3e50; margin-bottom: 5px; }
+        .page-sub { color: #777; margin-bottom: 20px; }
+        .card { background: white; border-radius: 14px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); margin-bottom: 20px; }
+        .card h3 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #f4f6f9; padding-bottom: 10px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+        .sum-card { background: white; padding: 18px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); text-align: center; }
+        .sum-card .num { font-size: 1.8rem; font-weight: bold; } .sum-card .lbl { font-size: 0.82rem; color: #777; margin-top: 4px; }
+        .progress-wrap { background: #eee; border-radius: 20px; height: 10px; margin: 10px 0; }
+        .progress-bar { height: 10px; border-radius: 20px; background: linear-gradient(90deg,#27ae60,#2ecc71); }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #2c3e50; color: white; padding: 11px; text-align: left; font-size: 0.88rem; }
+        td { padding: 11px; border-bottom: 1px solid #eee; font-size: 0.88rem; }
+        tr:hover td { background: #f8f9fb; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .badge-p { background: #d4edda; color: #155724; }
+        .badge-a { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <h2>🎓 EduManager</h2>
+    <a href="/student/dashboard">🏠 Dashboard</a>
+    <a href="/student/attendance" class="active">📋 Attendance</a>
+    <a href="/student/notes">📚 Notes</a>
+    <a href="/student/result">📊 Results</a>
+    <a href="/student/announcement">📢 Announcements</a>
+    <a href="/student/leave">🗓️ Leave</a>
+    <a href="/student/profile">👤 Profile</a>
+    <a href="/student/logout" class="logout-btn">🚪 Logout</a>
+</div>
+<div class="main">
+    <div class="page-title">📋 My Attendance</div>
+    <div class="page-sub">View your attendance record subject-wise.</div>
+    <div class="summary-grid">
+        <div class="sum-card"><div class="num" style="color:#27ae60">87%</div><div class="lbl">Overall</div></div>
+        <div class="sum-card"><div class="num" style="color:#2980b9">48</div><div class="lbl">Classes Attended</div></div>
+        <div class="sum-card"><div class="num" style="color:#e74c3c">7</div><div class="lbl">Classes Missed</div></div>
+        <div class="sum-card"><div class="num" style="color:#e67e22">55</div><div class="lbl">Total Classes</div></div>
+    </div>
+    <div class="card">
+        <h3>📊 Subject-wise Attendance</h3>
+        <table>
+            <thead><tr><th>Subject</th><th>Total</th><th>Present</th><th>Absent</th><th>Percentage</th><th>Progress</th></tr></thead>
+            <tbody>
+                <tr><td>Data Structures</td><td>12</td><td>11</td><td>1</td><td>91%</td><td><div class="progress-wrap"><div class="progress-bar" style="width:91%"></div></div></td></tr>
+                <tr><td>Operating Systems</td><td>10</td><td>8</td><td>2</td><td>80%</td><td><div class="progress-wrap"><div class="progress-bar" style="width:80%;background:linear-gradient(90deg,#f39c12,#e67e22)"></div></div></td></tr>
+                <tr><td>DBMS</td><td>11</td><td>10</td><td>1</td><td>90%</td><td><div class="progress-wrap"><div class="progress-bar" style="width:90%"></div></div></td></tr>
+                <tr><td>Computer Networks</td><td>12</td><td>9</td><td>3</td><td>75%</td><td><div class="progress-wrap"><div class="progress-bar" style="width:75%;background:linear-gradient(90deg,#e74c3c,#c0392b)"></div></div></td></tr>
+                <tr><td>Software Engineering</td><td>10</td><td>10</td><td>0</td><td>100%</td><td><div class="progress-wrap"><div class="progress-bar" style="width:100%"></div></div></td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="card">
+        <h3>📅 Recent Attendance Log</h3>
+        <table>
+            <thead><tr><th>Date</th><th>Subject</th><th>Status</th></tr></thead>
+            <tbody>
+                <tr><td>28 Apr 2026</td><td>Data Structures</td><td><span class="badge badge-p">✅ Present</span></td></tr>
+                <tr><td>27 Apr 2026</td><td>Operating Systems</td><td><span class="badge badge-a">❌ Absent</span></td></tr>
+                <tr><td>26 Apr 2026</td><td>DBMS</td><td><span class="badge badge-p">✅ Present</span></td></tr>
+                <tr><td>25 Apr 2026</td><td>Computer Networks</td><td><span class="badge badge-p">✅ Present</span></td></tr>
+                <tr><td>24 Apr 2026</td><td>Software Engineering</td><td><span class="badge badge-p">✅ Present</span></td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

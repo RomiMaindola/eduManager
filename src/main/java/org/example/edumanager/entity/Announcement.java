@@ -16,9 +16,15 @@ public class Announcement {
 
     private String title;
 
+
     private String content;
 
-    private Long createdBy;
+    @ManyToOne
+    @JoinColumn(name = "created_by")
+    private Staff createdBy;
 
     private LocalDateTime createdAt;
+
+    // Templates show priority (Normal / Urgent / Important)
+    private String priority;
 }

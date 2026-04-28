@@ -16,9 +16,17 @@ public class LeaveApplication {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId;
+    @ManyToOne
+    @JoinColumn(name = "student_id")
+    private Student student;       // non-null when applicant is a Student
+
+    @ManyToOne
+    @JoinColumn(name = "staff_id")
+    private Staff staff;           // non-null when applicant is a Staff member
 
     private String role;
+
+    private String leaveType;
 
     private LocalDate fromDate;
 

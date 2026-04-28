@@ -17,10 +17,16 @@ public class Attendance {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "student_id")
     private Student student;
 
     @ManyToOne
+    @JoinColumn(name = "subject_id")
     private Subject subject;
+
+    @ManyToOne
+    @JoinColumn(name = "marked_by")
+    private Staff markedBy;
 
     private LocalDate date;
 

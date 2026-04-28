@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Results</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #eef2f7; }
+        .sidebar { width: 240px; height: 100vh; background: linear-gradient(180deg,#1e3c72,#2a5298); color: white; position: fixed; padding-top: 20px; display: flex; flex-direction: column; }
+        .sidebar h2 { text-align: center; margin-bottom: 30px; font-size: 1.1rem; }
+        .sidebar a { display: flex; align-items: center; gap: 10px; padding: 13px 20px; color: white; text-decoration: none; font-size: 0.95rem; transition: background 0.2s; }
+        .sidebar a:hover, .sidebar a.active { background: rgba(255,255,255,0.15); border-left: 3px solid #fff; }
+        .sidebar .logout-btn { margin-top: auto; background: rgba(255,0,0,0.2); }
+        .main { margin-left: 240px; padding: 25px; }
+        .page-title { font-size: 1.6rem; font-weight: bold; color: #1e3c72; margin-bottom: 5px; }
+        .page-sub { color: #777; margin-bottom: 20px; }
+        .card { background: white; border-radius: 14px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .card h3 { margin-top: 0; color: #1e3c72; border-bottom: 2px solid #eef2f7; padding-bottom: 10px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-weight: 600; color: #555; font-size: 0.88rem; }
+        .form-group input, .form-group select { padding: 9px 12px; border: 1.5px solid #dde1e7; border-radius: 8px; font-size: 0.9rem; outline: none; }
+        .form-group input:focus, .form-group select:focus { border-color: #1e3c72; }
+        .btn-primary { background: linear-gradient(135deg,#1e3c72,#2a5298); color: white; padding: 10px 22px; border: none; border-radius: 8px; font-size: 0.92rem; font-weight: bold; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #1e3c72; color: white; padding: 11px; text-align: left; font-size: 0.88rem; }
+        td { padding: 11px; border-bottom: 1px solid #eee; font-size: 0.88rem; }
+        tr:hover td { background: #f8f9fb; }
+        td input { width: 70px; padding: 5px 8px; border: 1.5px solid #dde1e7; border-radius: 6px; font-size: 0.88rem; }
+        .grade { font-weight: bold; }
+        .grade-A { color: #27ae60; } .grade-B { color: #2980b9; } .grade-C { color: #e67e22; } .grade-F { color: #e74c3c; }
+        .btn-save { background: #27ae60; color: white; padding: 10px 22px; border: none; border-radius: 8px; font-size: 0.92rem; font-weight: bold; cursor: pointer; margin-top: 12px; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <h2>👨‍🏫 EduManager Staff</h2>
+    <a href="/staff/dashboard">🏠 Dashboard</a>
+    <a href="/staff/attendance">📋 Attendance</a>
+    <a href="/staff/notes">📚 Upload Notes</a>
+    <a href="/staff/result" class="active">📊 Results</a>
+    <a href="/staff/announcement">📢 Announcements</a>
+    <a href="/staff/leave">🗓️ Leave</a>
+    <a href="/staff/generate-exam">🧠 Generate Exam</a>
+    <a href="/staff/logout" class="logout-btn">🚪 Logout</a>
+</div>
+<div class="main">
+    <div class="page-title">📊 Enter / View Results</div>
+    <div class="page-sub">Enter marks and manage student results by subject.</div>
+    <div class="card">
+        <h3>🔍 Select Exam</h3>
+        <div class="form-row">
+            <div class="form-group"><label>Subject</label>
+                <select><option>Data Structures</option><option>OS</option><option>DBMS</option></select></div>
+            <div class="form-group"><label>Exam Type</label>
+                <select><option>Mid-Sem</option><option>End-Sem</option><option>Internal</option></select></div>
+            <div class="form-group"><label>Semester</label>
+                <select><option>5th Sem</option><option>3rd Sem</option><option>7th Sem</option></select></div>
+        </div>
+        <button class="btn-primary" onclick="loadResults()">Load Students</button>
+    </div>
+    <div class="card" id="resultsCard" style="display:none;">
+        <h3>📝 Enter Marks</h3>
+        <table>
+            <thead><tr><th>#</th><th>Admission No</th><th>Name</th><th>Marks (out of 100)</th><th>Grade</th></tr></thead>
+            <tbody id="resultsBody"></tbody>
+        </table>
+        <button class="btn-save" onclick="alert('Results saved!')">💾 Save Results</button>
+    </div>
+</div>
+<script>
+const students=[{no:'ADM001',name:'Aakash Sharma'},{no:'ADM002',name:'Priya Verma'},{no:'ADM003',name:'Rahul Gupta'},{no:'ADM004',name:'Sneha Patel'}];
+function getGrade(m){ if(m>=85) return '<span class="grade grade-A">A</span>'; if(m>=70) return '<span class="grade grade-B">B</span>'; if(m>=50) return '<span class="grade grade-C">C</span>'; return '<span class="grade grade-F">F</span>'; }
+function loadResults(){
+    const tbody=document.getElementById('resultsBody'); tbody.innerHTML='';
+    students.forEach((s,i)=>{
+        tbody.innerHTML+=`<tr><td>${i+1}</td><td>${s.no}</td><td>${s.name}</td>
+        <td><input type="number" min="0" max="100" placeholder="0-100" oninput="updateGrade(this,'grade_${i}')"></td>
+        <td id="grade_${i}">—</td></tr>`;
+    });
+    document.getElementById('resultsCard').style.display='block';
+}
+function updateGrade(input,gId){ document.getElementById(gId).innerHTML=input.value?getGrade(parseInt(input.value)):'—'; }
+</script>
+</body>
+</html>

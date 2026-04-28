@@ -13,12 +13,20 @@ public class Notes {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String title;
+
     @ManyToOne
+    @JoinColumn(name = "subject_id")
     private Subject subject;
 
-    private Long uploadedBy; // staff id
+    @ManyToOne
+    @JoinColumn(name = "uploaded_by")
+    private Staff uploadedBy; // staff id
 
     private String fileUrl;
+
+
+    private String description;
 
     private String type; // Notes / Assignment
 }

@@ -30,7 +30,7 @@ import lombok.*;
 
         private String branch;
 
-        private String profileImageUrl;
+
 
         private String role = "ROLE_STUDENT";
     }

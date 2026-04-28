@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Student Dashboard</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: #f4f6f9;
+        }
+
+        /* Layout */
+        .sidebar {
+            width: 220px;
+            height: 100vh;
+            background: #2c3e50;
+            color: white;
+            position: fixed;
+            padding-top: 20px;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 12px;
+            color: white;
+            text-decoration: none;
+        }
+
+        .sidebar a:hover {
+            background: #34495e;
+        }
+
+        .main {
+            margin-left: 220px;
+            padding: 20px;
+        }
+
+        /* Profile Card */
+        .profile-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        /* Sections */
+        .section {
+            margin-top: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>🎓 Student</h2>
+    <a href="#">Dashboard</a>
+    <a href="#">Attendance</a>
+    <a href="#">Notes</a>
+    <a href="#">Results</a>
+    <a href="#">Announcements</a>
+    <a href="#">Leave</a>
+</div>
+
+<div class="main">
+
+    <h2>Welcome, <span th:text="${student.name}"></span></h2>
+
+    <div class="profile-card">
+        <h3>Profile Information</h3>
+        <div class="profile-grid">
+            <div><span class="label">Name:</span> <span th:text="${student.name}"></span></div>
+            <div><span class="label">Email:</span> <span th:text="${student.email}"></span></div>
+            <div><span class="label">Admission No:</span> <span th:text="${student.admissionNo}"></span></div>
+            <div><span class="label">Branch:</span> <span th:text="${student.branch}"></span></div>
+            <div><span class="label">Semester:</span> <span th:text="${student.semester}"></span></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Quick Actions</h3>
+        <p>Use the sidebar to navigate to attendance, notes, results, and more.</p>
+    </div>
+
+</div>
+
+</body>
+</html>

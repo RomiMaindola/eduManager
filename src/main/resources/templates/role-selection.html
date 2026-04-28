@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Select Login</title>
+
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            font-family: Arial;
+        }
+
+        .container {
+            display: flex;
+            gap: 50px;
+        }
+
+        .card {
+            width: 220px;
+            height: 250px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+
+            color: white;
+            font-size: 20px;
+
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .card:hover {
+            transform: rotateY(15deg) rotateX(10deg) scale(1.1);
+        }
+
+        a {
+            text-decoration: none;
+            color: white;
+        }
+
+        .icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <a th:href="@{/student/login-page}">
+        <div class="card">
+            <div class="icon">🎓</div>
+            Student Login
+        </div>
+    </a>
+
+    <a th:href="@{/staff/login-page}">
+        <div class="card">
+            <div class="icon">👨‍🏫</div>
+            Staff Login
+        </div>
+    </a>
+
+</div>
+
+</body>
+</html>
