@@ -79,13 +79,15 @@
 <body>
 
 <div class="sidebar">
-    <h2>👨‍🏫 Staff</h2>
-    <a href="#">Dashboard</a>
-    <a href="#">Attendance</a>
-    <a href="#">Upload Notes</a>
-    <a href="#">Results</a>
-    <a href="#">Announcements</a>
-    <a href="#">Leave</a>
+    <h2>👨‍🏫 EduManager Staff</h2>
+    <a th:href="@{/staff/dashboard}">🏠 Dashboard</a>
+    <a th:href="@{/staff/attendance}" class="active">📋 Attendance</a>
+    <a th:href="@{/staff/notes}">📚 Upload Notes</a>
+    <a th:href="@{/staff/result}">📊 Results</a>
+    <a th:href="@{/staff/announcement}">📢 Announcements</a>
+    <a th:href="@{/staff/leave}">🗓️ Leave</a>
+    <a th:href="@{/staff/generate-exam}">🧠 Generate Exam</a>
+    <a th:href="@{/staff/logout}" class="logout-btn">🚪 Logout</a>
 </div>
 
 <div class="main">
@@ -105,11 +107,11 @@
     <!-- AI EXAM GENERATOR -->
     <div class="section ai-box">
         <h3>🧠 Generate Semester Exam Paper</h3>
-        <p>Enter units and generate question paper using AI.</p>
+<!--        <p>Enter units and generate question paper using AI.</p>-->
 
         <form action="/staff/generate-paper" method="post">
-            <input type="text" name="subject" placeholder="Subject Name" required><br><br>
-            <input type="text" name="units" placeholder="Enter Units (e.g., Unit 1,2,3)" required><br><br>
+<!--            <input type="text" name="subject" placeholder="Subject Name" required><br><br>-->
+<!--            <input type="text" name="units" placeholder="Enter Units (e.g., Unit 1,2,3)" required><br><br>-->
             <button type="submit">Generate Paper</button>
         </form>
     </div>

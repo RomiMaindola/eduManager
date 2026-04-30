@@ -1,90 +1,617 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Study Notes</title>
+    <title>Study Notes – EduManager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f6f9; }
-        .sidebar { width: 220px; height: 100vh; background: linear-gradient(180deg,#2c3e50,#34495e); color: white; position: fixed; padding-top: 20px; display: flex; flex-direction: column; }
-        .sidebar h2 { text-align: center; margin-bottom: 30px; font-size: 1.1rem; }
-        .sidebar a { display: flex; align-items: center; gap: 10px; padding: 13px 18px; color: white; text-decoration: none; font-size: 0.92rem; transition: background 0.2s; }
-        .sidebar a:hover, .sidebar a.active { background: rgba(255,255,255,0.15); border-left: 3px solid #fff; }
-        .sidebar .logout-btn { margin-top: auto; background: rgba(255,0,0,0.2); }
-        .main { margin-left: 220px; padding: 25px; }
-        .page-title { font-size: 1.6rem; font-weight: bold; color: #2c3e50; margin-bottom: 5px; }
-        .page-sub { color: #777; margin-bottom: 20px; }
-        .filter-bar { display: flex; gap: 12px; margin-bottom: 20px; }
-        .filter-bar select, .filter-bar input { padding: 9px 14px; border: 1.5px solid #dde1e7; border-radius: 8px; font-size: 0.92rem; outline: none; }
-        .notes-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
-        .note-card { background: white; border-radius: 14px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); transition: transform 0.2s; border-top: 4px solid; }
-        .note-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
-        .note-card:nth-child(1){ border-color: #2c3e50; } .note-card:nth-child(2){ border-color: #27ae60; } .note-card:nth-child(3){ border-color: #e67e22; } .note-card:nth-child(4){ border-color: #9b59b6; } .note-card:nth-child(5){ border-color: #2980b9; } .note-card:nth-child(6){ border-color: #e74c3c; }
-        .note-icon { font-size: 2rem; margin-bottom: 10px; }
-        .note-title { font-weight: bold; color: #333; margin-bottom: 5px; }
-        .note-sub { font-size: 0.82rem; color: #777; margin-bottom: 10px; }
-        .note-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #999; }
-        .download-btn { background: #2c3e50; color: white; padding: 6px 14px; border: none; border-radius: 6px; font-size: 0.82rem; cursor: pointer; text-decoration: none; display: inline-block; }
-        .download-btn:hover { background: #34495e; }
-        .badge { padding: 3px 8px; border-radius: 10px; font-size: 0.77rem; background: #e8edf8; color: #2c3e50; }
+        :root {
+            --sidebar-bg: #1a2535;
+            --sidebar-hover: #243447;
+            --accent: #4f8ef7;
+            --accent-light: #e8f0fe;
+            --bg: #f0f3f8;
+            --card-bg: #ffffff;
+            --text: #1e2a3a;
+            --muted: #7a8fa6;
+            --border: #e2e8f0;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 230px;
+            height: 100vh;
+            background: var(--sidebar-bg);
+            color: white;
+            position: fixed;
+            top: 0; left: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            z-index: 100;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+        }
+
+        .sidebar-brand {
+            padding: 24px 20px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .sidebar-brand h2 {
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            color: #fff;
+        }
+
+        .sidebar-brand .semester-tag {
+            display: inline-block;
+            margin-top: 6px;
+            font-size: 0.72rem;
+            background: var(--accent);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .sidebar nav { flex: 1; padding: 12px 0; }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 11px 20px;
+            color: rgba(255,255,255,0.72);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: all 0.18s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar a:hover {
+            background: var(--sidebar-hover);
+            color: #fff;
+            border-left-color: rgba(255,255,255,0.3);
+        }
+
+        .sidebar a.active {
+            background: rgba(79,142,247,0.15);
+            color: #7fb3ff;
+            border-left-color: var(--accent);
+        }
+
+        .sidebar .logout-btn {
+            margin: 10px 14px 18px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: rgba(239,68,68,0.12);
+            color: #fca5a5;
+            border-left: none !important;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .sidebar .logout-btn:hover {
+            background: rgba(239,68,68,0.22);
+            border-left: none !important;
+        }
+
+        /* ── MAIN ── */
+        .main {
+            margin-left: 230px;
+            padding: 30px 32px;
+            min-height: 100vh;
+        }
+
+        /* ── PAGE HEADER ── */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 1.55rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        .page-sub {
+            font-size: 0.88rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .semester-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--accent-light);
+            color: var(--accent);
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1.5px solid var(--accent);
+        }
+
+        /* ── STAT ROW ── */
+        .stat-row {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .stat-chip {
+            background: var(--card-bg);
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 18px;
+            font-size: 0.83rem;
+            color: var(--muted);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .stat-chip strong { color: var(--text); font-size: 1rem; }
+
+        /* ── FILTERS ── */
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-bar select,
+        .filter-bar input[type="text"] {
+            padding: 9px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            font-family: inherit;
+            font-size: 0.87rem;
+            color: var(--text);
+            background: var(--card-bg);
+            outline: none;
+            transition: border-color 0.18s;
+        }
+
+        .filter-bar select:focus,
+        .filter-bar input[type="text"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79,142,247,0.12);
+        }
+
+        .filter-bar input[type="text"] { width: 220px; }
+
+        .type-pills {
+            display: flex;
+            gap: 6px;
+            margin-left: 4px;
+        }
+
+        .type-pill {
+            padding: 7px 16px;
+            border-radius: 20px;
+            border: 1.5px solid var(--border);
+            background: var(--card-bg);
+            font-size: 0.83rem;
+            font-weight: 600;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.16s;
+        }
+
+        .type-pill:hover, .type-pill.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        /* ── NOTES GRID ── */
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 18px;
+        }
+
+        /* color palette for border-top */
+        .note-card { --card-color: #4f8ef7; }
+        .note-card:nth-child(6n+1) { --card-color: #4f8ef7; }
+        .note-card:nth-child(6n+2) { --card-color: #22c55e; }
+        .note-card:nth-child(6n+3) { --card-color: #f59e0b; }
+        .note-card:nth-child(6n+4) { --card-color: #8b5cf6; }
+        .note-card:nth-child(6n+5) { --card-color: #ef4444; }
+        .note-card:nth-child(6n+6) { --card-color: #06b6d4; }
+
+        .note-card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            border-top: 4px solid var(--card-color);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            animation: fadeUp 0.35s ease both;
+        }
+
+        .note-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 28px rgba(0,0,0,0.1);
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .note-card-top {
+            display: flex;
+            align-items: flex-start;
+            gap: 13px;
+        }
+
+        .note-icon-box {
+            width: 44px; height: 44px;
+            border-radius: 10px;
+            background: color-mix(in srgb, var(--card-color) 12%, white);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .note-info { flex: 1; min-width: 0; }
+
+        .note-title {
+            font-weight: 700;
+            font-size: 0.93rem;
+            color: var(--text);
+            line-height: 1.35;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .note-subject {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-top: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 2px 9px;
+            border-radius: 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        .type-badge.notes    { background: #e8f0fe; color: #4f8ef7; }
+        .type-badge.assignment { background: #fef3c7; color: #d97706; }
+        .type-badge.other    { background: #f3e8ff; color: #7c3aed; }
+
+        .note-desc {
+            font-size: 0.82rem;
+            color: var(--muted);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .note-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            padding-top: 10px;
+            margin-top: auto;
+        }
+
+        .note-meta-info {
+            font-size: 0.77rem;
+            color: var(--muted);
+        }
+
+        .note-meta-info span { display: block; }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--text);
+            color: #fff;
+            padding: 7px 15px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.18s, transform 0.15s;
+        }
+
+        .download-btn:hover {
+            background: var(--accent);
+            transform: scale(1.04);
+        }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 70px 20px;
+            text-align: center;
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 2px dashed var(--border);
+        }
+
+        .empty-state .empty-icon { font-size: 3.5rem; margin-bottom: 14px; }
+        .empty-state h3 { font-size: 1.1rem; color: var(--text); margin-bottom: 6px; }
+        .empty-state p  { font-size: 0.88rem; color: var(--muted); max-width: 340px; }
+
+        /* ── SECTION DIVIDERS ── */
+        .subject-section { margin-bottom: 32px; }
+
+        .subject-section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .subject-section-header h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .subject-count-badge {
+            background: var(--accent-light);
+            color: var(--accent);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 9px;
+            border-radius: 10px;
+        }
+
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
     </style>
 </head>
 <body>
+
+<!-- ════════════ SIDEBAR ════════════ -->
 <div class="sidebar">
-    <h2>🎓 EduManager</h2>
-    <a href="/student/dashboard">🏠 Dashboard</a>
-    <a href="/student/attendance">📋 Attendance</a>
-    <a href="/student/notes" class="active">📚 Notes</a>
-    <a href="/student/result">📊 Results</a>
-    <a href="/student/announcement">📢 Announcements</a>
-    <a href="/student/leave">🗓️ Leave</a>
-    <a href="/student/profile">👤 Profile</a>
-    <a href="/student/logout" class="logout-btn">🚪 Logout</a>
+    <div class="sidebar-brand">
+        <h2>🎓 EduManager</h2>
+        <span class="semester-tag" th:text="'Semester ' + ${student.semester}">Semester —</span>
+    </div>
+    <nav>
+        <a th:href="@{/student/dashboard}">🏠 Dashboard</a>
+        <a th:href="@{/student/attendance}">📋 Attendance</a>
+        <a th:href="@{/student/notes}" class="active">📚 Notes</a>
+        <a th:href="@{/student/result}">📊 Results</a>
+        <a th:href="@{/student/announcement}">📢 Announcements</a>
+        <a th:href="@{/student/leave}">🗓️ Leave</a>
+        <a th:href="@{/student/profile}">👤 Profile</a>
+    </nav>
+    <a th:href="@{/student/logout}" class="logout-btn">🚪 Logout</a>
 </div>
+
+<!-- ════════════ MAIN ════════════ -->
 <div class="main">
-    <div class="page-title">📚 Study Notes</div>
-    <div class="page-sub">Access lecture notes and study materials uploaded by your teachers.</div>
-    <div class="filter-bar">
-        <select><option>All Subjects</option><option>Data Structures</option><option>OS</option><option>DBMS</option><option>CN</option></select>
-        <input type="text" placeholder="🔍 Search notes...">
-    </div>
-    <div class="notes-grid">
-        <div class="note-card">
-            <div class="note-icon">📄</div>
-            <div class="note-title">Unit 1 - Arrays & Linked Lists</div>
-            <div class="note-sub"><span class="badge">Data Structures</span></div>
-            <div class="note-meta"><span>20 Apr 2026</span><a href="#" class="download-btn">⬇️ Download</a></div>
+
+    <!-- Header -->
+    <div class="page-header">
+        <div>
+            <div class="page-title">📚 Study Notes</div>
+            <div class="page-sub">
+                Showing notes for
+                <strong th:text="'Semester ' + ${student.semester}">your semester</strong>
+                subjects only
+            </div>
         </div>
-        <div class="note-card">
-            <div class="note-icon">📘</div>
-            <div class="note-title">Process Scheduling Algorithms</div>
-            <div class="note-sub"><span class="badge">Operating Systems</span></div>
-            <div class="note-meta"><span>18 Apr 2026</span><a href="#" class="download-btn">⬇️ Download</a></div>
-        </div>
-        <div class="note-card">
-            <div class="note-icon">📗</div>
-            <div class="note-title">SQL Joins and Normalization</div>
-            <div class="note-sub"><span class="badge">DBMS</span></div>
-            <div class="note-meta"><span>15 Apr 2026</span><a href="#" class="download-btn">⬇️ Download</a></div>
-        </div>
-        <div class="note-card">
-            <div class="note-icon">📕</div>
-            <div class="note-title">TCP/IP Protocol Stack</div>
-            <div class="note-sub"><span class="badge">Computer Networks</span></div>
-            <div class="note-meta"><span>12 Apr 2026</span><a href="#" class="download-btn">⬇️ Download</a></div>
-        </div>
-        <div class="note-card">
-            <div class="note-icon">📙</div>
-            <div class="note-title">Unit 3 - Trees and Graphs</div>
-            <div class="note-sub"><span class="badge">Data Structures</span></div>
-            <div class="note-meta"><span>10 Apr 2026</span><a href="#" class="download-btn">⬇️ Download</a></div>
-        </div>
-        <div class="note-card">
-            <div class="note-icon">📓</div>
-            <div class="note-title">SDLC Models - Waterfall, Agile</div>
-            <div class="note-sub"><span class="badge">Software Engineering</span></div>
-            <div class="note-meta"><span>08 Apr 2026</span><a href="#" class="download-btn">⬇️ Download</a></div>
+        <div class="semester-pill">
+            📅 Semester <span th:text="${student.semester}">—</span>
         </div>
     </div>
-</div>
+
+    <!-- Stats row -->
+    <div class="stat-row">
+        <div class="stat-chip">
+            📄 <strong th:text="${notesList != null ? notesList.size() : 0}">0</strong> total notes
+        </div>
+        <div class="stat-chip">
+            📘 <strong th:text="${subjects != null ? subjects.size() : 0}">0</strong> subjects
+        </div>
+    </div>
+
+    <!-- Filter bar -->
+    <form method="get" th:action="@{/student/notes}">
+        <div class="filter-bar">
+
+            <!-- Subject filter: only shows student's semester subjects -->
+            <select name="subjectId" onchange="this.form.submit()">
+                <option value="" th:selected="${selectedSubjectId == null}">📚 All Subjects</option>
+                <option th:each="sub : ${subjects}"
+                        th:value="${sub.id}"
+                        th:text="${sub.subjectName}"
+                        th:selected="${selectedSubjectId != null and selectedSubjectId == sub.id}">
+                </option>
+            </select>
+
+            <!-- Search box (client-side) -->
+            <input type="text" id="searchInput" placeholder="🔍 Search notes by title…" oninput="filterCards()">
+
+            <!-- Type filter pills (client-side) -->
+            <div class="type-pills">
+                <span class="type-pill active" onclick="setType('all', this)">All</span>
+                <span class="type-pill" onclick="setType('Notes', this)">📝 Notes</span>
+                <span class="type-pill" onclick="setType('Assignment', this)">📌 Assignments</span>
+            </div>
+        </div>
+    </form>
+
+    <!-- ── NOTES CONTENT ── -->
+
+    <!-- Empty state when no notes at all -->
+    <div th:if="${notesList == null or notesList.isEmpty()}" class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h3>No notes available yet</h3>
+        <p>Your teachers haven't uploaded any notes for
+            <span th:text="'Semester ' + ${student.semester}">your semester</span> subjects yet.
+            Check back soon!</p>
+    </div>
+
+    <!-- Notes grouped by subject -->
+    <div th:unless="${notesList == null or notesList.isEmpty()}" id="notesContainer">
+        <!--
+            Group notes by subject.
+            We iterate subjects first, then show notes belonging to each subject.
+        -->
+        <div th:each="sub : ${subjects}" class="subject-section">
+
+            <!-- Collect notes for this subject -->
+            <th:block th:with="subNotes=${notesList.stream()
+                .filter(n -> n.subject != null and n.subject.id == sub.id)
+                .toList()}">
+
+                <!-- Only render section if this subject has notes -->
+                <div th:if="${!subNotes.isEmpty()}">
+
+                    <!-- Section header -->
+                    <div class="subject-section-header">
+                        <h3 th:text="${sub.subjectName}">Subject</h3>
+                        <span class="subject-count-badge" th:text="${subNotes.size()} + ' notes'">0 notes</span>
+                        <div class="divider-line"></div>
+                    </div>
+
+                    <!-- Notes grid for this subject -->
+                    <div class="notes-grid">
+                        <div th:each="note : ${subNotes}"
+                             class="note-card"
+                             th:attr="data-title=${note.title}, data-type=${note.type}">
+
+                            <div class="note-card-top">
+                                <!-- Icon depends on type -->
+                                <div class="note-icon-box">
+                                    <span th:text="${note.type == 'Assignment'} ? '📌' : '📄'">📄</span>
+                                </div>
+                                <div class="note-info">
+                                    <div class="note-title" th:text="${note.title}">Note Title</div>
+                                    <div class="note-subject" th:text="${note.subject?.subjectName}">Subject</div>
+                                </div>
+                                <!-- Type badge -->
+                                <span th:class="${'type-badge ' + (note.type == 'Assignment' ? 'assignment' : (note.type == 'Notes' ? 'notes' : 'other'))}"
+                                      th:text="${note.type}">Notes</span>
+                            </div>
+
+                            <!-- Description (if present) -->
+                            <div class="note-desc"
+                                 th:if="${note.description != null and !note.description.isEmpty()}"
+                                 th:text="${note.description}">
+                                Description here...
+                            </div>
+
+                            <div class="note-footer">
+                                <div class="note-meta-info">
+                                    <span th:text="'By ' + ${note.uploadedBy?.name}">By Teacher</span>
+                                </div>
+                                <a th:href="${note.fileUrl}"
+                                   target="_blank"
+                                   class="download-btn"
+                                   download>
+                                    ⬇️ Download
+                                </a>
+                            </div>
+
+                        </div><!-- /note-card -->
+                    </div><!-- /notes-grid -->
+
+                </div><!-- /th:if subNotes not empty -->
+
+            </th:block>
+        </div><!-- /subject-section -->
+
+        <!-- Fallback if selected subject has no notes -->
+        <div id="noResultsMsg" style="display:none;" class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <h3>No notes found</h3>
+            <p>Try a different search term or filter.</p>
+        </div>
+    </div><!-- /notesContainer -->
+
+</div><!-- /main -->
+
+<!-- ── CLIENT-SIDE SEARCH & TYPE FILTER ── -->
+<script>
+    let activeType = 'all';
+
+    function setType(type, el) {
+        activeType = type;
+        document.querySelectorAll('.type-pill').forEach(p => p.classList.remove('active'));
+        el.classList.add('active');
+        filterCards();
+    }
+
+    function filterCards() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const cards = document.querySelectorAll('.note-card');
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const title = (card.dataset.title || '').toLowerCase();
+            const type  = (card.dataset.type  || '').toLowerCase();
+            const matchSearch = title.includes(query);
+            const matchType   = activeType === 'all' || type === activeType.toLowerCase();
+            const show = matchSearch && matchType;
+            card.style.display = show ? '' : 'none';
+            if (show) visibleCount++;
+        });
+
+        // Hide/show section headers based on whether their grid has visible cards
+        document.querySelectorAll('.subject-section').forEach(section => {
+            const anyVisible = Array.from(section.querySelectorAll('.note-card'))
+                .some(c => c.style.display !== 'none');
+            section.style.display = anyVisible ? '' : 'none';
+        });
+
+        const noMsg = document.getElementById('noResultsMsg');
+        if (noMsg) noMsg.style.display = visibleCount === 0 ? 'flex' : 'none';
+    }
+</script>
+
 </body>
 </html>

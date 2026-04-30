@@ -1,6 +1,7 @@
 package org.example.edumanager.Controller;
 
 import jakarta.servlet.http.HttpSession;
+import org.example.edumanager.Repositiory.SubjectRepository;
 import org.example.edumanager.Service.INotesService;
 import org.example.edumanager.Service.ISubjectService;
 import org.example.edumanager.entity.Notes;
@@ -24,17 +25,20 @@ public class NotesController {
 
     private final INotesService notesService;
     private final ISubjectService subjectService;
+    private final SubjectRepository subjectRepository;
 
     // Files are stored under src/main/resources/static/uploads/notes/
     private static final String UPLOAD_DIR = "src/main/resources/static/uploads/notes/";
 
-    public NotesController(INotesService notesService, ISubjectService subjectService) {
+    public NotesController(INotesService notesService,
+                           ISubjectService subjectService,
+                           SubjectRepository subjectRepository) {
         this.notesService = notesService;
         this.subjectService = subjectService;
+        this.subjectRepository = subjectRepository;
     }
 
     // ── STAFF: GET /staff/notes ───────────────────────────────────────────────
-    // Renders staff-notes.html with the upload form and the "Uploaded Notes" table
     @GetMapping("/staff/notes")
     public String staffNotesPage(HttpSession session, Model model) {
         Object user = session.getAttribute("user");
@@ -50,7 +54,6 @@ public class NotesController {
     }
 
     // ── STAFF: POST /staff/notes/upload ──────────────────────────────────────
-    // "📤 Upload Notes" button submits the form in staff-notes.html
     @PostMapping("/staff/notes/upload")
     public String uploadNotes(@RequestParam String title,
                               @RequestParam Long subjectId,
@@ -64,7 +67,6 @@ public class NotesController {
         Subject subject = subjectService.findById(subjectId)
                 .orElseThrow(() -> new RuntimeException("Subject not found"));
 
-        // Save uploaded file to static folder so Thymeleaf can link to it
         String originalFilename = file.getOriginalFilename();
         String uniqueFilename = UUID.randomUUID() + "_" + originalFilename;
         Path uploadPath = Paths.get(UPLOAD_DIR);
@@ -86,7 +88,6 @@ public class NotesController {
     }
 
     // ── STAFF: POST /staff/notes/delete/{id} ─────────────────────────────────
-    // The 🗑️ delete button in the staff-notes.html table
     @PostMapping("/staff/notes/delete/{id}")
     public String deleteNote(@PathVariable Long id, HttpSession session) {
         Object user = session.getAttribute("user");
@@ -96,7 +97,8 @@ public class NotesController {
     }
 
     // ── STUDENT: GET /student/notes ───────────────────────────────────────────
-    // Renders student-notes.html with all notes (filter by subject if provided)
+    // KEY CHANGE: subjects list is filtered to the student's semester only.
+    // notesList is also scoped to that semester (optionally narrowed by subjectId).
     @GetMapping("/student/notes")
     public String studentNotesPage(@RequestParam(required = false) Long subjectId,
                                    HttpSession session,
@@ -104,18 +106,41 @@ public class NotesController {
         Object user = session.getAttribute("user");
         if (!(user instanceof Student student)) return "redirect:/student/login-page";
 
+        // Only subjects that belong to this student's semester
+        List<Subject> semesterSubjects = subjectRepository.findBySemester(student.getSemester());
+
         List<Notes> notesList;
         if (subjectId != null) {
-            notesList = notesService.findBySubjectIdNewestFirst(subjectId);
+            final Long tempSubjectId = subjectId;
+            // Extra safety: ensure the requested subjectId belongs to the student's semester
+            boolean belongsToSemester = semesterSubjects.stream()
+                    .anyMatch(s -> s.getId().equals(tempSubjectId));
+            if (belongsToSemester) {
+                notesList = notesService.findBySubjectIdNewestFirst(subjectId);
+            } else {
+                // Ignore invalid/cross-semester filter — show all semester notes
+                notesList = notesForSemester(semesterSubjects);
+                subjectId = null; // reset so the dropdown shows "All Subjects"
+            }
         } else {
-            notesList = notesService.findAllNewestFirst();
+            // Fetch notes for all subjects in this semester
+            notesList = notesForSemester(semesterSubjects);
         }
 
-        List<Subject> subjects = subjectService.findAll();
         model.addAttribute("student", student);
         model.addAttribute("notesList", notesList);
-        model.addAttribute("subjects", subjects);
+        model.addAttribute("subjects", semesterSubjects);      // semester-scoped subjects only
         model.addAttribute("selectedSubjectId", subjectId);
         return "student-notes";
+    }
+
+    /**
+     * Collects and returns notes for all subjects in the given list,
+     * ordered newest first per subject.
+     */
+    private List<Notes> notesForSemester(List<Subject> subjects) {
+        return subjects.stream()
+                .flatMap(s -> notesService.findBySubjectIdNewestFirst(s.getId()).stream())
+                .toList();
     }
 }

@@ -73,13 +73,15 @@
 <body>
 
 <div class="sidebar">
-    <h2>🎓 Student</h2>
-    <a href="#">Dashboard</a>
-    <a href="#">Attendance</a>
-    <a href="#">Notes</a>
-    <a href="#">Results</a>
-    <a href="#">Announcements</a>
-    <a href="#">Leave</a>
+    <h2>🎓 EduManager</h2>
+    <a th:href="@{/student/dashboard}">🏠 Dashboard</a>
+    <a th:href="@{/student/attendance}" class="active">📋 Attendance</a>
+    <a th:href="@{/student/notes}">📚 Notes</a>
+    <a th:href="@{/student/result}">📊 Results</a>
+    <a th:href="@{/student/announcement}">📢 Announcements</a>
+    <a th:href="@{/student/leave}">🗓️ Leave</a>
+    <a th:href="@{/student/profile}">👤 Profile</a>
+    <a th:href="@{/student/logout}" class="logout-btn">🚪 Logout</a>
 </div>
 
 <div class="main">

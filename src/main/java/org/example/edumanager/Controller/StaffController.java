@@ -55,12 +55,5 @@ public class StaffController {
         return "redirect:/";
     }
 
-    // ── /staff/generate-exam ──────────────────────────────────────────────────
-    @GetMapping("/generate-exam")
-    public String generateExam(HttpSession session, Model model) {
-        Object user = session.getAttribute("user");
-        if (!(user instanceof Staff staff)) return "redirect:/staff/login-page";
-        model.addAttribute("staff", staff);
-        return "generate-paper";
-    }
+
 }
