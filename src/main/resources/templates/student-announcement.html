@@ -15,70 +15,52 @@
         .page-sub { color: #777; margin-bottom: 20px; }
         .ann-list { display: flex; flex-direction: column; gap: 14px; }
         .ann-card { background: white; border-radius: 14px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); border-left: 5px solid; }
-        .ann-card.urgent { border-color: #e74c3c; }
-        .ann-card.important { border-color: #e67e22; }
-        .ann-card.normal { border-color: #2980b9; }
+        .ann-card.urgent   { border-color: #e74c3c; }
+        .ann-card.important{ border-color: #e67e22; }
+        .ann-card.normal   { border-color: #2980b9; }
         .ann-card h4 { margin: 0 0 8px; color: #333; }
         .ann-card p { margin: 0 0 10px; color: #555; font-size: 0.92rem; line-height: 1.6; }
-        .ann-meta { font-size: 0.8rem; color: #999; display: flex; gap: 14px; }
+        .ann-meta { font-size: 0.8rem; color: #999; display: flex; gap: 14px; flex-wrap: wrap; }
         .badge { padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: bold; }
-        .badge-urgent { background: #f8d7da; color: #721c24; }
+        .badge-urgent    { background: #f8d7da; color: #721c24; }
         .badge-important { background: #fff3cd; color: #856404; }
-        .badge-normal { background: #cce5ff; color: #004085; }
+        .badge-normal    { background: #cce5ff; color: #004085; }
     </style>
 </head>
 <body>
 <div class="sidebar">
     <h2>🎓 EduManager</h2>
-    <a href="/student/dashboard">🏠 Dashboard</a>
-    <a href="/student/attendance">📋 Attendance</a>
-    <a href="/student/notes">📚 Notes</a>
-    <a href="/student/result">📊 Results</a>
-    <a href="/student/announcement" class="active">📢 Announcements</a>
-    <a href="/student/leave">🗓️ Leave</a>
-    <a href="/student/profile">👤 Profile</a>
-    <a href="/student/logout" class="logout-btn">🚪 Logout</a>
+    <a th:href="@{/student/dashboard}">🏠 Dashboard</a>
+    <a th:href="@{/student/attendance}">📋 Attendance</a>
+    <a th:href="@{/student/notes}">📚 Notes</a>
+    <a th:href="@{/student/result}">📊 Results</a>
+    <a th:href="@{/student/announcement}" class="active">📢 Announcements</a>
+    <a th:href="@{/student/leave}">🗓️ Leave</a>
+    <a th:href="@{/student/profile}">👤 Profile</a>
+    <a th:href="@{/student/logout}" class="logout-btn">🚪 Logout</a>
 </div>
 <div class="main">
     <div class="page-title">📢 Announcements</div>
     <div class="page-sub">Latest notices and updates from your teachers and institution.</div>
+
     <div class="ann-list">
-        <div class="ann-card urgent">
-            <h4>⚠️ End Semester Exam Schedule Released</h4>
-            <p>The end-semester examination schedule for all subjects has been officially released. Exams begin from 15th May 2026. Please review the timetable on the notice board and prepare accordingly.</p>
+        <!-- Iterate over announcements from DB -->
+        <div th:each="ann : ${announcements}"
+             th:class="'ann-card ' + ${#strings.toLowerCase(ann.priority)}">
+            <h4 th:text="${ann.title}">Title</h4>
+            <p th:text="${ann.content}">Content</p>
             <div class="ann-meta">
-                <span>Posted: 22 Apr 2026</span>
-                <span>By: Exam Cell</span>
-                <span class="badge badge-urgent">🔴 Urgent</span>
+                <span th:text="'Posted: ' + ${#temporals.format(ann.createdAt, 'dd MMM yyyy')}">Date</span>
+                <span th:text="'By: ' + ${ann.createdBy.name}">Staff</span>
+                <span th:class="'badge badge-' + ${#strings.toLowerCase(ann.priority)}"
+                      th:text="${ann.priority == 'Urgent'}    ? '🔴 Urgent' :
+                                (${ann.priority == 'Important'} ? '🟡 Important' : '🔵 Normal')">
+                    Priority
+                </span>
             </div>
         </div>
-        <div class="ann-card important">
-            <h4>📝 Assignment Submission Deadline Extended</h4>
-            <p>The deadline for submitting the Data Structures assignment (Unit 3 - Trees and Graphs) has been extended to 30th April 2026. No further extensions will be granted.</p>
-            <div class="ann-meta">
-                <span>Posted: 20 Apr 2026</span>
-                <span>By: Dr. Sharma</span>
-                <span class="badge badge-important">🟡 Important</span>
-            </div>
-        </div>
-        <div class="ann-card normal">
-            <h4>📚 Extra Classes - Operating Systems</h4>
-            <p>Extra classes for Operating Systems (Process Synchronization) will be held every Saturday from 10 AM to 12 PM starting next week.</p>
-            <div class="ann-meta">
-                <span>Posted: 18 Apr 2026</span>
-                <span>By: Prof. Mehta</span>
-                <span class="badge badge-normal">🔵 Normal</span>
-            </div>
-        </div>
-        <div class="ann-card normal">
-            <h4>🏆 Technical Fest Registration Open</h4>
-            <p>Registrations for TechFest 2026 are now open. Students are encouraged to participate in coding contests, project expo, and hackathons. Last date to register: 5th May 2026.</p>
-            <div class="ann-meta">
-                <span>Posted: 15 Apr 2026</span>
-                <span>By: Student Cell</span>
-                <span class="badge badge-normal">🔵 Normal</span>
-            </div>
-        </div>
+
+        <p th:if="${#lists.isEmpty(announcements)}" style="color:#999;">No announcements yet.</p>
     </div>
 </div>
 </body>

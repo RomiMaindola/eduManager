@@ -2,6 +2,9 @@ package org.example.edumanager.Controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.example.edumanager.Service.IAnnouncementService;
+import org.example.edumanager.Service.ILeaveApplicationService;
+import org.example.edumanager.Service.ISubjectService;
 import org.example.edumanager.entity.Staff;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -13,63 +16,37 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/staff")
 public class StaffController {
 
+    private final IAnnouncementService announcementService;
+    private final ILeaveApplicationService leaveService;
+    private final ISubjectService subjectService;
+
+    public StaffController(IAnnouncementService announcementService,
+                           ILeaveApplicationService leaveService,
+                           ISubjectService subjectService) {
+        this.announcementService = announcementService;
+        this.leaveService = leaveService;
+        this.subjectService = subjectService;
+    }
+
+    // ── /staff/dashboard ─────────────────────────────────────────────────────
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
         Object user = session.getAttribute("user");
-        if (!(user instanceof Staff)) {
-            return "redirect:/staff/login-page";
-        }
-        model.addAttribute("staff", user);
+        if (!(user instanceof Staff staff)) return "redirect:/staff/login-page";
+
+        // Populate staff dashboard profile card (staff-dashboard.html uses ${staff.name} etc.)
+        model.addAttribute("staff", staff);
+
+        // Quick stats for the dashboard (recent leave applications by this staff)
+        model.addAttribute("pendingLeaves",
+                leaveService.findByStaffAndStatus(staff.getId(), "Pending").size());
+        model.addAttribute("myAnnouncements",
+                announcementService.findByStaffId(staff.getId()).size());
+
         return "staff-dashboard";
     }
 
-    @GetMapping("/attendance")
-    public String attendance(HttpSession session, Model model) {
-        Object user = session.getAttribute("user");
-        if (!(user instanceof Staff)) return "redirect:/staff/login-page";
-        model.addAttribute("staff", user);
-        return "staff-attendance";
-    }
-
-    @GetMapping("/notes")
-    public String notes(HttpSession session, Model model) {
-        Object user = session.getAttribute("user");
-        if (!(user instanceof Staff)) return "redirect:/staff/login-page";
-        model.addAttribute("staff", user);
-        return "staff-notes";
-    }
-
-    @GetMapping("/result")
-    public String result(HttpSession session, Model model) {
-        Object user = session.getAttribute("user");
-        if (!(user instanceof Staff)) return "redirect:/staff/login-page";
-        model.addAttribute("staff", user);
-        return "staff-result";
-    }
-
-    @GetMapping("/announcement")
-    public String announcement(HttpSession session, Model model) {
-        Object user = session.getAttribute("user");
-        if (!(user instanceof Staff)) return "redirect:/staff/login-page";
-        model.addAttribute("staff", user);
-        return "staff-announcement";
-    }
-
-    @GetMapping("/leave")
-    public String leave(HttpSession session, Model model) {
-        Object user = session.getAttribute("user");
-        if (!(user instanceof Staff)) return "redirect:/staff/login-page";
-        model.addAttribute("staff", user);
-        return "staff-leave";
-    }
-    @GetMapping("/generate-exam")
-    public String generateExam(HttpSession session, Model model) {
-        Object user = session.getAttribute("user");
-        if (!(user instanceof Staff)) return "redirect:/staff/login-page";
-        model.addAttribute("staff", user);
-        return "generate-paper";
-    }
-
+    // ── /staff/logout ─────────────────────────────────────────────────────────
     @GetMapping("/logout")
     public String logout(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
@@ -77,4 +54,6 @@ public class StaffController {
         SecurityContextHolder.clearContext();
         return "redirect:/";
     }
+
+
 }

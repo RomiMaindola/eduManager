@@ -17,14 +17,20 @@
         .card h3 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #f4f6f9; padding-bottom: 10px; }
         .summary-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 20px; }
         .sum-card { background: white; padding: 18px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); text-align: center; border-top: 4px solid; }
-        .sum-card:nth-child(1){ border-color: #27ae60; } .sum-card:nth-child(2){ border-color: #2980b9; } .sum-card:nth-child(3){ border-color: #9b59b6; }
-        .sum-card .num { font-size: 2rem; font-weight: bold; color: #333; } .sum-card .lbl { font-size: 0.82rem; color: #777; margin-top: 4px; }
+        .sum-card:nth-child(1){ border-color: #27ae60; }
+        .sum-card:nth-child(2){ border-color: #2980b9; }
+        .sum-card:nth-child(3){ border-color: #9b59b6; }
+        .sum-card .num { font-size: 2rem; font-weight: bold; color: #333; }
+        .sum-card .lbl { font-size: 0.82rem; color: #777; margin-top: 4px; }
         table { width: 100%; border-collapse: collapse; }
         th { background: #2c3e50; color: white; padding: 11px; text-align: left; font-size: 0.88rem; }
         td { padding: 11px; border-bottom: 1px solid #eee; font-size: 0.88rem; }
         tr:hover td { background: #f8f9fb; }
         .grade { font-weight: bold; padding: 4px 10px; border-radius: 20px; font-size: 0.82rem; }
-        .grade-A { background: #d4edda; color: #155724; } .grade-B { background: #cce5ff; color: #004085; } .grade-C { background: #fff3cd; color: #856404; } .grade-F { background: #f8d7da; color: #721c24; }
+        .grade-A { background: #d4edda; color: #155724; }
+        .grade-B { background: #cce5ff; color: #004085; }
+        .grade-C { background: #fff3cd; color: #856404; }
+        .grade-F { background: #f8d7da; color: #721c24; }
         .progress-wrap { background: #eee; border-radius: 20px; height: 8px; }
         .progress-bar { height: 8px; border-radius: 20px; }
         select.sem-filter { padding: 9px 14px; border: 1.5px solid #dde1e7; border-radius: 8px; font-size: 0.92rem; outline: none; margin-bottom: 16px; }
@@ -33,34 +39,72 @@
 <body>
 <div class="sidebar">
     <h2>🎓 EduManager</h2>
-    <a href="/student/dashboard">🏠 Dashboard</a>
-    <a href="/student/attendance">📋 Attendance</a>
-    <a href="/student/notes">📚 Notes</a>
-    <a href="/student/result" class="active">📊 Results</a>
-    <a href="/student/announcement">📢 Announcements</a>
-    <a href="/student/leave">🗓️ Leave</a>
-    <a href="/student/profile">👤 Profile</a>
-    <a href="/student/logout" class="logout-btn">🚪 Logout</a>
+    <a th:href="@{/student/dashboard}">🏠 Dashboard</a>
+    <a th:href="@{/student/attendance}">📋 Attendance</a>
+    <a th:href="@{/student/notes}">📚 Notes</a>
+    <a th:href="@{/student/result}" class="active">📊 Results</a>
+    <a th:href="@{/student/announcement}">📢 Announcements</a>
+    <a th:href="@{/student/leave}">🗓️ Leave</a>
+    <a th:href="@{/student/profile}">👤 Profile</a>
+    <a th:href="@{/student/logout}" class="logout-btn">🚪 Logout</a>
 </div>
 <div class="main">
     <div class="page-title">📊 My Results</div>
     <div class="page-sub">View your academic performance and grades.</div>
+
+    <!-- Summary Cards from DB -->
     <div class="summary-grid">
-        <div class="sum-card"><div class="num" style="color:#27ae60">74</div><div class="lbl">Average Marks</div></div>
-        <div class="sum-card"><div class="num" style="color:#2980b9">B+</div><div class="lbl">Overall Grade</div></div>
-        <div class="sum-card"><div class="num" style="color:#9b59b6">7.4</div><div class="lbl">CGPA</div></div>
+        <div class="sum-card">
+            <div class="num" style="color:#27ae60" th:text="${avgMarks}">74</div>
+            <div class="lbl">Average Marks</div>
+        </div>
+        <div class="sum-card">
+            <div class="num" style="color:#2980b9" th:text="${overallGrade}">B+</div>
+            <div class="lbl">Overall Grade</div>
+        </div>
+        <div class="sum-card">
+            <div class="num" style="color:#9b59b6" th:text="${cgpa}">7.4</div>
+            <div class="lbl">CGPA</div>
+        </div>
     </div>
+
     <div class="card">
         <h3>📋 Subject-wise Results</h3>
-        <select class="sem-filter"><option>5th Semester</option><option>3rd Semester</option><option>1st Semester</option></select>
+        <!-- Semester filter: GET /student/result?semester=5th -->
+        <form th:action="@{/student/result}" method="get" style="display:inline;">
+            <select class="sem-filter" name="semester" onchange="this.form.submit()">
+                <option value="" th:selected="${selectedSemester == ''}">All Semesters</option>
+                <option value="5th" th:selected="${selectedSemester == '5th'}">5th Semester</option>
+                <option value="3rd" th:selected="${selectedSemester == '3rd'}">3rd Semester</option>
+                <option value="1st" th:selected="${selectedSemester == '1st'}">1st Semester</option>
+            </select>
+        </form>
         <table>
-            <thead><tr><th>Subject</th><th>Max Marks</th><th>Marks Obtained</th><th>Grade</th><th>Performance</th></tr></thead>
+            <thead>
+            <tr><th>Subject</th><th>Max Marks</th><th>Marks Obtained</th><th>Grade</th><th>Performance</th></tr>
+            </thead>
             <tbody>
-                <tr><td>Data Structures</td><td>100</td><td>88</td><td><span class="grade grade-A">A</span></td><td><div class="progress-wrap"><div class="progress-bar" style="width:88%;background:#27ae60"></div></div></td></tr>
-                <tr><td>Operating Systems</td><td>100</td><td>72</td><td><span class="grade grade-B">B</span></td><td><div class="progress-wrap"><div class="progress-bar" style="width:72%;background:#2980b9"></div></div></td></tr>
-                <tr><td>DBMS</td><td>100</td><td>80</td><td><span class="grade grade-A">A</span></td><td><div class="progress-wrap"><div class="progress-bar" style="width:80%;background:#27ae60"></div></div></td></tr>
-                <tr><td>Computer Networks</td><td>100</td><td>65</td><td><span class="grade grade-B">B</span></td><td><div class="progress-wrap"><div class="progress-bar" style="width:65%;background:#e67e22"></div></div></td></tr>
-                <tr><td>Software Engineering</td><td>100</td><td>78</td><td><span class="grade grade-B">B</span></td><td><div class="progress-wrap"><div class="progress-bar" style="width:78%;background:#2980b9"></div></div></td></tr>
+            <tr th:each="result : ${results}">
+                <td th:text="${result.subject.subjectName}">Subject</td>
+                <td>100</td>
+                <td th:text="${result.marks}">88</td>
+                <td>
+                    <span th:class="'grade grade-' + ${result.grade}" th:text="${result.grade}">A</span>
+                </td>
+                <td>
+                    <div class="progress-wrap">
+                        <div class="progress-bar"
+                             th:style="'width:' + ${result.marks} + '%;background:' +
+                                           (${result.marks >= 85} ? '#27ae60' :
+                                            (${result.marks >= 70} ? '#2980b9' :
+                                             (${result.marks >= 50} ? '#e67e22' : '#e74c3c')))">
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(results)}">
+                <td colspan="5" style="color:#999;text-align:center;">No results found for this semester.</td>
+            </tr>
             </tbody>
         </table>
     </div>

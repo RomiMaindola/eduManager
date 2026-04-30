@@ -19,100 +19,108 @@
         .form-group { display: flex; flex-direction: column; gap: 6px; }
         .form-group label { font-weight: 600; color: #555; font-size: 0.9rem; }
         .form-group input, .form-group select { padding: 10px 14px; border: 1.5px solid #dde1e7; border-radius: 8px; font-size: 0.95rem; outline: none; }
-        .form-group input:focus, .form-group select:focus { border-color: #1e3c72; }
         .btn-primary { background: linear-gradient(135deg,#1e3c72,#2a5298); color: white; padding: 10px 24px; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer; }
         table { width: 100%; border-collapse: collapse; }
         th { background: #1e3c72; color: white; padding: 12px; text-align: left; font-size: 0.9rem; }
         td { padding: 12px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
         tr:hover td { background: #f8f9fb; }
-        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
-        .badge-present { background: #d4edda; color: #155724; }
-        .badge-absent { background: #f8d7da; color: #721c24; }
-        select.att-select { border: none; background: transparent; font-weight: bold; cursor: pointer; }
+        select.att-select { border: 1px solid #dde1e7; border-radius: 6px; padding: 5px 8px; font-weight: bold; cursor: pointer; }
         .btn-save { background: #27ae60; color: white; padding: 10px 24px; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer; margin-top: 12px; }
+        .alert-success { background: #d4edda; color: #155724; padding: 10px 16px; border-radius: 8px; margin-bottom: 14px; }
     </style>
 </head>
 <body>
 <div class="sidebar">
     <h2>👨‍🏫 EduManager Staff</h2>
-    <a href="/staff/dashboard">🏠 Dashboard</a>
-    <a href="/staff/attendance" class="active">📋 Attendance</a>
-    <a href="/staff/notes">📚 Upload Notes</a>
-    <a href="/staff/result">📊 Results</a>
-    <a href="/staff/announcement">📢 Announcements</a>
-    <a href="/staff/leave">🗓️ Leave</a>
-    <a href="/staff/generate-exam">🧠 Generate Exam</a>
-    <a href="/staff/logout" class="logout-btn">🚪 Logout</a>
+    <a th:href="@{/staff/dashboard}">🏠 Dashboard</a>
+    <a th:href="@{/staff/attendance}" class="active">📋 Attendance</a>
+    <a th:href="@{/staff/notes}">📚 Upload Notes</a>
+    <a th:href="@{/staff/result}">📊 Results</a>
+    <a th:href="@{/staff/announcement}">📢 Announcements</a>
+    <a th:href="@{/staff/leave}">🗓️ Leave</a>
+    <a th:href="@{/staff/generate-exam}">🧠 Generate Exam</a>
+    <a th:href="@{/staff/logout}" class="logout-btn">🚪 Logout</a>
 </div>
 <div class="main">
     <div class="page-title">📋 Mark Attendance</div>
     <div class="page-sub">Record and manage student attendance for your class.</div>
 
+    <div class="alert-success" th:if="${param.saved}">✅ Attendance saved successfully!</div>
+
+    <!-- Filter Form: GET /staff/attendance/load -->
     <div class="card">
         <h3>Filter / Select Class</h3>
-        <div class="form-row">
-            <div class="form-group">
-                <label>Date</label>
-                <input type="date" id="attDate">
+        <form th:action="@{/staff/attendance/load}" method="get">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" name="date" th:value="${selectedDate}" required>
+                </div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    <select name="subjectId" required>
+                        <option value="" disabled th:unless="${selectedSubjectId}">-- Select Subject --</option>
+                        <option th:each="sub : ${subjects}"
+                                th:value="${sub.id}"
+                                th:text="${sub.subjectName}"
+                                th:selected="${sub.id == selectedSubjectId}">
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Semester</label>
+                    <select name="semester">
+                        <option value="">All</option>
+                        <option value="1" th:selected="${selectedSemester == '1'}">1th Semester</option>
+                        <option value="2" th:selected="${selectedSemester == '2'}">2rd Semester</option>
+                        <option value="3" th:selected="${selectedSemester == '3'}">3th Semester</option>
+                        <option value="4" th:selected="${selectedSemester == '4'}">4th Semester</option>
+                        <option value="5" th:selected="${selectedSemester == '5'}">5rd Semester</option>
+                        <option value="6" th:selected="${selectedSemester == '6'}">6th Semester</option>
+                        <option value="7" th:selected="${selectedSemester == '7'}">7rd Semester</option>
+                        <option value="8" th:selected="${selectedSemester == '8'}">8th Semester</option>
+                    </select>
+                </div>
             </div>
-            <div class="form-group">
-                <label>Subject</label>
-                <select id="attSubject">
-                    <option>Data Structures</option>
-                    <option>Operating Systems</option>
-                    <option>DBMS</option>
-                    <option>Computer Networks</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Semester</label>
-                <select>
-                    <option>5th Semester</option>
-                    <option>3rd Semester</option>
-                    <option>7th Semester</option>
-                </select>
-            </div>
-        </div>
-        <button class="btn-primary" onclick="loadStudents()">Load Students</button>
+            <button class="btn-primary" type="submit">Load Students</button>
+        </form>
     </div>
 
-    <div class="card" id="attendanceTable" style="display:none;">
+    <!-- Attendance Table: shown only after students are loaded -->
+    <div class="card" th:if="${students != null and !#lists.isEmpty(students)}">
         <h3>📋 Student Attendance List</h3>
-        <table id="stuTable">
-            <thead>
+        <!-- Save form: POST /staff/attendance/save -->
+        <form th:action="@{/staff/attendance/save}" method="post">
+            <input type="hidden" name="subjectId" th:value="${selectedSubjectId}">
+            <input type="hidden" name="date" th:value="${selectedDate}">
+            <table>
+                <thead>
                 <tr>
                     <th>#</th>
                     <th>Admission No</th>
                     <th>Student Name</th>
                     <th>Attendance</th>
                 </tr>
-            </thead>
-            <tbody id="stuBody"></tbody>
-        </table>
-        <button class="btn-save" onclick="saveAttendance()">💾 Save Attendance</button>
+                </thead>
+                <tbody>
+                <tr th:each="student, iter : ${students}">
+                    <td th:text="${iter.count}">1</td>
+                    <td th:text="${student.admissionNo}">ADM001</td>
+                    <td th:text="${student.name}">Name</td>
+                    <td>
+                        <!-- Hidden field for studentId so controller can pair it with status -->
+                        <input type="hidden" name="studentIds" th:value="${student.id}">
+                        <select class="att-select" name="statuses">
+                            <option value="Present" style="color:green">✅ Present</option>
+                            <option value="Absent"  style="color:red">❌ Absent</option>
+                        </select>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <button class="btn-save" type="submit">💾 Save Attendance</button>
+        </form>
     </div>
 </div>
-<script>
-document.getElementById('attDate').value = new Date().toISOString().split('T')[0];
-const students = [
-    {no:'ADM001',name:'Aakash Sharma'},{no:'ADM002',name:'Priya Verma'},{no:'ADM003',name:'Rahul Gupta'},
-    {no:'ADM004',name:'Sneha Patel'},{no:'ADM005',name:'Mohan Das'},{no:'ADM006',name:'Kavya Nair'}
-];
-function loadStudents() {
-    const tbody = document.getElementById('stuBody');
-    tbody.innerHTML = '';
-    students.forEach((s,i) => {
-        tbody.innerHTML += `<tr>
-            <td>${i+1}</td><td>${s.no}</td><td>${s.name}</td>
-            <td><select class="att-select" id="att_${s.no}">
-                <option value="P" style="color:green">✅ Present</option>
-                <option value="A" style="color:red">❌ Absent</option>
-            </select></td>
-        </tr>`;
-    });
-    document.getElementById('attendanceTable').style.display='block';
-}
-function saveAttendance() { alert('✅ Attendance saved successfully!'); }
-</script>
 </body>
 </html>

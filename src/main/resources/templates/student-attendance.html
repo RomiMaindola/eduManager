@@ -17,7 +17,8 @@
         .card h3 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #f4f6f9; padding-bottom: 10px; }
         .summary-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
         .sum-card { background: white; padding: 18px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); text-align: center; }
-        .sum-card .num { font-size: 1.8rem; font-weight: bold; } .sum-card .lbl { font-size: 0.82rem; color: #777; margin-top: 4px; }
+        .sum-card .num { font-size: 1.8rem; font-weight: bold; }
+        .sum-card .lbl { font-size: 0.82rem; color: #777; margin-top: 4px; }
         .progress-wrap { background: #eee; border-radius: 20px; height: 10px; margin: 10px 0; }
         .progress-bar { height: 10px; border-radius: 20px; background: linear-gradient(90deg,#27ae60,#2ecc71); }
         table { width: 100%; border-collapse: collapse; }
@@ -32,47 +33,87 @@
 <body>
 <div class="sidebar">
     <h2>🎓 EduManager</h2>
-    <a href="/student/dashboard">🏠 Dashboard</a>
-    <a href="/student/attendance" class="active">📋 Attendance</a>
-    <a href="/student/notes">📚 Notes</a>
-    <a href="/student/result">📊 Results</a>
-    <a href="/student/announcement">📢 Announcements</a>
-    <a href="/student/leave">🗓️ Leave</a>
-    <a href="/student/profile">👤 Profile</a>
-    <a href="/student/logout" class="logout-btn">🚪 Logout</a>
+    <a th:href="@{/student/dashboard}">🏠 Dashboard</a>
+    <a th:href="@{/student/attendance}" class="active">📋 Attendance</a>
+    <a th:href="@{/student/notes}">📚 Notes</a>
+    <a th:href="@{/student/result}">📊 Results</a>
+    <a th:href="@{/student/announcement}">📢 Announcements</a>
+    <a th:href="@{/student/leave}">🗓️ Leave</a>
+    <a th:href="@{/student/profile}">👤 Profile</a>
+    <a th:href="@{/student/logout}" class="logout-btn">🚪 Logout</a>
 </div>
 <div class="main">
     <div class="page-title">📋 My Attendance</div>
     <div class="page-sub">View your attendance record subject-wise.</div>
+
+    <!-- Summary Cards from DB -->
     <div class="summary-grid">
-        <div class="sum-card"><div class="num" style="color:#27ae60">87%</div><div class="lbl">Overall</div></div>
-        <div class="sum-card"><div class="num" style="color:#2980b9">48</div><div class="lbl">Classes Attended</div></div>
-        <div class="sum-card"><div class="num" style="color:#e74c3c">7</div><div class="lbl">Classes Missed</div></div>
-        <div class="sum-card"><div class="num" style="color:#e67e22">55</div><div class="lbl">Total Classes</div></div>
+        <div class="sum-card">
+            <div class="num" style="color:#27ae60" th:text="${overallPercentage + '%'}">87%</div>
+            <div class="lbl">Overall</div>
+        </div>
+        <div class="sum-card">
+            <div class="num" style="color:#2980b9" th:text="${totalPresent}">48</div>
+            <div class="lbl">Classes Attended</div>
+        </div>
+        <div class="sum-card">
+            <div class="num" style="color:#e74c3c" th:text="${totalAbsent}">7</div>
+            <div class="lbl">Classes Missed</div>
+        </div>
+        <div class="sum-card">
+            <div class="num" style="color:#e67e22" th:text="${totalClasses}">55</div>
+            <div class="lbl">Total Classes</div>
+        </div>
     </div>
+
+    <!-- Subject-wise Attendance from DB -->
     <div class="card">
         <h3>📊 Subject-wise Attendance</h3>
         <table>
-            <thead><tr><th>Subject</th><th>Total</th><th>Present</th><th>Absent</th><th>Percentage</th><th>Progress</th></tr></thead>
+            <thead>
+            <tr><th>Subject</th><th>Total</th><th>Present</th><th>Absent</th><th>Percentage</th><th>Progress</th></tr>
+            </thead>
             <tbody>
-                <tr><td>Data Structures</td><td>12</td><td>11</td><td>1</td><td>91%</td><td><div class="progress-wrap"><div class="progress-bar" style="width:91%"></div></div></td></tr>
-                <tr><td>Operating Systems</td><td>10</td><td>8</td><td>2</td><td>80%</td><td><div class="progress-wrap"><div class="progress-bar" style="width:80%;background:linear-gradient(90deg,#f39c12,#e67e22)"></div></div></td></tr>
-                <tr><td>DBMS</td><td>11</td><td>10</td><td>1</td><td>90%</td><td><div class="progress-wrap"><div class="progress-bar" style="width:90%"></div></div></td></tr>
-                <tr><td>Computer Networks</td><td>12</td><td>9</td><td>3</td><td>75%</td><td><div class="progress-wrap"><div class="progress-bar" style="width:75%;background:linear-gradient(90deg,#e74c3c,#c0392b)"></div></div></td></tr>
-                <tr><td>Software Engineering</td><td>10</td><td>10</td><td>0</td><td>100%</td><td><div class="progress-wrap"><div class="progress-bar" style="width:100%"></div></div></td></tr>
+            <tr th:each="s : ${summaries}">
+                <td th:text="${s.subjectName}">Subject</td>
+                <td th:text="${s.total}">12</td>
+                <td th:text="${s.present}">11</td>
+                <td th:text="${s.absent}">1</td>
+                <td th:text="${#numbers.formatDecimal(s.percentage, 1, 0) + '%'}">91%</td>
+                <td>
+                    <div class="progress-wrap">
+                        <div class="progress-bar"
+                             th:style="'width:' + ${s.percentage} + '%;' +
+                                           (${s.percentage < 75} ? 'background:linear-gradient(90deg,#e74c3c,#c0392b)' :
+                                            (${s.percentage < 85} ? 'background:linear-gradient(90deg,#f39c12,#e67e22)' : ''))">
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(summaries)}">
+                <td colspan="6" style="color:#999;text-align:center;">No attendance records yet.</td>
+            </tr>
             </tbody>
         </table>
     </div>
+
+    <!-- Recent Attendance Log from DB -->
     <div class="card">
         <h3>📅 Recent Attendance Log</h3>
         <table>
             <thead><tr><th>Date</th><th>Subject</th><th>Status</th></tr></thead>
             <tbody>
-                <tr><td>28 Apr 2026</td><td>Data Structures</td><td><span class="badge badge-p">✅ Present</span></td></tr>
-                <tr><td>27 Apr 2026</td><td>Operating Systems</td><td><span class="badge badge-a">❌ Absent</span></td></tr>
-                <tr><td>26 Apr 2026</td><td>DBMS</td><td><span class="badge badge-p">✅ Present</span></td></tr>
-                <tr><td>25 Apr 2026</td><td>Computer Networks</td><td><span class="badge badge-p">✅ Present</span></td></tr>
-                <tr><td>24 Apr 2026</td><td>Software Engineering</td><td><span class="badge badge-p">✅ Present</span></td></tr>
+            <tr th:each="att : ${recentLog}">
+                <td th:text="${#temporals.format(att.date, 'dd MMM yyyy')}">Date</td>
+                <td th:text="${att.subject.subjectName}">Subject</td>
+                <td>
+                        <span th:class="'badge ' + (${att.status == 'Present'} ? 'badge-p' : 'badge-a')"
+                              th:text="${att.status == 'Present'} ? '✅ Present' : '❌ Absent'">Status</span>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(recentLog)}">
+                <td colspan="3" style="color:#999;text-align:center;">No recent attendance.</td>
+            </tr>
             </tbody>
         </table>
     </div>

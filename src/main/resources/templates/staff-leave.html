@@ -26,46 +26,85 @@
         tr:hover td { background: #f8f9fb; }
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
         .badge-approved { background: #d4edda; color: #155724; }
-        .badge-pending { background: #fff3cd; color: #856404; }
+        .badge-pending  { background: #fff3cd; color: #856404; }
         .badge-rejected { background: #f8d7da; color: #721c24; }
+        .alert-success { background: #d4edda; color: #155724; padding: 10px 16px; border-radius: 8px; margin-bottom: 14px; }
     </style>
 </head>
 <body>
 <div class="sidebar">
     <h2>👨‍🏫 EduManager Staff</h2>
-    <a href="/staff/dashboard">🏠 Dashboard</a>
-    <a href="/staff/attendance">📋 Attendance</a>
-    <a href="/staff/notes">📚 Upload Notes</a>
-    <a href="/staff/result">📊 Results</a>
-    <a href="/staff/announcement">📢 Announcements</a>
-    <a href="/staff/leave" class="active">🗓️ Leave</a>
-    <a href="/staff/generate-exam">🧠 Generate Exam</a>
-    <a href="/staff/logout" class="logout-btn">🚪 Logout</a>
+    <a th:href="@{/staff/dashboard}">🏠 Dashboard</a>
+    <a th:href="@{/staff/attendance}">📋 Attendance</a>
+    <a th:href="@{/staff/notes}">📚 Upload Notes</a>
+    <a th:href="@{/staff/result}">📊 Results</a>
+    <a th:href="@{/staff/announcement}">📢 Announcements</a>
+    <a th:href="@{/staff/leave}" class="active">🗓️ Leave</a>
+    <a th:href="@{/staff/generate-exam}">🧠 Generate Exam</a>
+    <a th:href="@{/staff/logout}" class="logout-btn">🚪 Logout</a>
 </div>
 <div class="main">
     <div class="page-title">🗓️ Leave Application</div>
     <div class="page-sub">Apply for leave and track your application status.</div>
+
+    <div class="alert-success" th:if="${param.submitted}">✅ Leave application submitted!</div>
+
+    <!-- Apply Form: POST /staff/leave -->
     <div class="card">
         <h3>📋 Apply for Leave</h3>
-        <div class="form-row">
-            <div class="form-group"><label>Leave Type</label>
-                <select><option>Sick Leave</option><option>Casual Leave</option><option>Earned Leave</option><option>Emergency Leave</option></select></div>
-            <div class="form-group"><label>No. of Days</label>
-                <input type="number" placeholder="e.g., 2" min="1"></div>
-            <div class="form-group"><label>From Date</label><input type="date"></div>
-            <div class="form-group"><label>To Date</label><input type="date"></div>
-        </div>
-        <div class="form-group"><label>Reason *</label><textarea rows="4" placeholder="Please explain the reason for your leave..."></textarea></div>
-        <button class="btn-primary" onclick="alert('Leave application submitted!')">📨 Submit Application</button>
+        <form th:action="@{/staff/leave}" method="post">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Leave Type</label>
+                    <select name="leaveType">
+                        <option value="Sick Leave">Sick Leave</option>
+                        <option value="Casual Leave">Casual Leave</option>
+                        <option value="Earned Leave">Earned Leave</option>
+                        <option value="Emergency Leave">Emergency Leave</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>From Date</label>
+                    <input type="date" name="fromDate" required>
+                </div>
+                <div class="form-group">
+                    <label>To Date</label>
+                    <input type="date" name="toDate" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Reason *</label>
+                <textarea name="reason" rows="4" placeholder="Please explain the reason for your leave..." required></textarea>
+            </div>
+            <button class="btn-primary" type="submit">📨 Submit Application</button>
+        </form>
     </div>
+
+    <!-- Leave History from DB -->
     <div class="card">
         <h3>📂 My Leave History</h3>
         <table>
-            <thead><tr><th>#</th><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Status</th></tr></thead>
+            <thead>
+            <tr><th>#</th><th>Type</th><th>From</th><th>To</th><th>Status</th></tr>
+            </thead>
             <tbody>
-                <tr><td>1</td><td>Sick Leave</td><td>10 Apr 2026</td><td>11 Apr 2026</td><td>2</td><td><span class="badge badge-approved">✅ Approved</span></td></tr>
-                <tr><td>2</td><td>Casual Leave</td><td>25 Apr 2026</td><td>25 Apr 2026</td><td>1</td><td><span class="badge badge-pending">⏳ Pending</span></td></tr>
-                <tr><td>3</td><td>Emergency Leave</td><td>05 Mar 2026</td><td>07 Mar 2026</td><td>3</td><td><span class="badge badge-approved">✅ Approved</span></td></tr>
+            <tr th:each="leave, iter : ${leaveHistory}">
+                <td th:text="${iter.count}">1</td>
+                <td th:text="${leave.leaveType}">Sick Leave</td>
+                <td th:text="${#temporals.format(leave.fromDate, 'dd MMM yyyy')}">Date</td>
+                <td th:text="${#temporals.format(leave.toDate,   'dd MMM yyyy')}">Date</td>
+                <td>
+                        <span th:class="'badge ' + (${leave.status == 'Approved'} ? 'badge-approved' :
+                                                     (${leave.status == 'Rejected'} ? 'badge-rejected' : 'badge-pending'))"
+                              th:text="${leave.status == 'Approved'} ? '✅ Approved' :
+                                        (${leave.status == 'Rejected'} ? '❌ Rejected' : '⏳ Pending')">
+                            Status
+                        </span>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(leaveHistory)}">
+                <td colspan="5" style="color:#999;text-align:center;">No leave applications yet.</td>
+            </tr>
             </tbody>
         </table>
     </div>

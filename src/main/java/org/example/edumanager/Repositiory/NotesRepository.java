@@ -4,9 +4,10 @@ import org.example.edumanager.entity.Notes;
 import org.example.edumanager.entity.Staff;
 import org.example.edumanager.entity.Subject;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
-
+@Repository
 public interface NotesRepository extends JpaRepository<Notes, Long> {
 
     // Student view: all notes for a subject (student-notes.html filter by subject)
